@@ -7,6 +7,7 @@ Install
   ```
 
 Running
+* yarn
   ```sh
   yarn dev
   ```
