@@ -6,8 +6,7 @@ Install
   yarn add -D vite
   ```
 
-  Running
-* yarn
+Running
   ```sh
   yarn dev
   ```
