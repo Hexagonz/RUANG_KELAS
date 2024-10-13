@@ -1,47 +1,65 @@
-import React, { useEffect, useState } from 'react';
-import { Link } from "react-router-dom"
+import React, { useEffect, useState, useRef} from 'react';
+import { Link  } from "react-router-dom"
 import { Confirmation } from '../../lib';
-// Icons dari Font Awesome bisa diinstal menggunakan react-icons
 import { FaCalendar, FaUsers, FaTachometerAlt, FaChevronDown  } from 'react-icons/fa';
+import "./style/style.css";
 
-import { useNavigate } from 'react-router-dom';
 
 const Dashboard: React.FC = () => {
   const [jadwalCount, setJadwalCount] = useState<number>(0);
   const [accountCount, setAccountCount] = useState<number>(0);
-  const [semester, setSemester] = useState<string>('Genap');
-  const [showConfirmation, setShowConfirmation] = useState(false);
+  const [semester, setSemester] = useState<string>("Genap");
+  const [selectedClass, setSelectedClass] = useState<string | null>(null);
+  const [selectedSms, setSelectedSms] = useState<number | null>(null);
+  const dashboardButtonRef = useRef<HTMLButtonElement | null>(null);
+
+  const handleSelectClass = (className: string | null, smstr: number | null) => {
+    setSelectedClass(className);
+    setSelectedSms(smstr);
+  };
+
+  const handelSemesters = (value: string) => {
+    setSemester(value);
+    localStorage.setItem("semester",value);
+  }
   
-  const handleConfirm = () => {
-    setShowConfirmation(true);
-  };
-
-  const navigate = useNavigate();
-
-  const logoutUser = () => {
-    // Logika logout
-    navigate('/login');
-  };
-
   useEffect(() => {
-    // Mem-fetch data jadwal dan akun dari localStorage atau API
     setJadwalCount(10); // Contoh data jadwal
     setAccountCount(5); // Contoh data akun
-  }, []);
+    // Fokus otomatis pada tombol Dashboard
+    // localStorage.setItem("semester","Genap");
+    if(!localStorage.getItem("semester")) {
+      localStorage.setItem("semester",semester);
+    } else {
+      const storage = localStorage.getItem("semester") as string;
+      setSemester(storage);
+    }
+    if(selectedClass == null) {
+      dashboardButtonRef.current!.style.backgroundColor = 'rgb(30 58 138/1)' ;
+    } else {
+      dashboardButtonRef.current!.style.backgroundColor = '' ;
+    }
+  }, [selectedClass,semester]);
 
   return (
     <div className="min-h-screen bg-gray-100 flex">
       {/* Sidebar */}
       <aside className="w-72 bg-[#364F97] text-white">
         <div className="py-4">
-          <div className="text-center text-2xl font-bold mb-6"><Link to="/">PRESISTI</Link></div>
+          <div className="text-center text-2xl font-bold mb-6">
+            <Link to="/">STUDILAB</Link>
+          </div>
           <hr className="my-4 border-gray-400" />
           <nav className="space-y-2">
-            <a href="/dashboard" className="flex items-center px-4 py-2 text-white focus:bg-blue-900 hover:bg-blue-900">
+            <button
+              ref={dashboardButtonRef} 
+              onClick={() => handleSelectClass(null,null)}
+              className="flex items-center px-4 py-2 text-white hover:bg-blue-900 w-full"
+            >
               <FaTachometerAlt className="mr-2" />
               <span>Dashboard</span>
-            </a>
-            <JadwalSemester jadwal={3} smstr={semester == "Genap" ? 0 : 1 }/>
+            </button>
+            <JadwalSemester jadwal={3} smstr={semester == "Genap" ? 0 : 1 } onSelectClass={handleSelectClass}/>
             <a href="/akun" className="flex items-center px-4 py-2">
               <FaUsers className="mr-2" />
               <span>Akun</span>
@@ -52,7 +70,282 @@ const Dashboard: React.FC = () => {
 
       {/* Main Content */}
       <div className="flex flex-col flex-1">
-        <header className="bg-white shadow py-4 px-6">
+      <NavDash/>
+        <main className="slide-page p-6">
+          {selectedClass ? (
+              <>
+                <TableComponent smstr={selectedSms} kelas={selectedClass}/>
+                
+              </>
+          ) : (
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+              <Card title="Jumlah Jadwal" count={jadwalCount} icon={<FaCalendar />} />
+              <Card title="Jumlah Akun" count={accountCount} icon={<FaUsers />} />
+
+              <div className="col-span-1">
+                <div className="bg-white p-4 rounded-lg shadow-lg">
+                  <div className="flex justify-between items-center">
+                    <div>
+                      <h5 className="text-lg font-bold text-gray-600">Semester</h5>
+                      <p className="text-gray-800 font-bold">{semester}</p>
+                    </div>
+                    <select
+                      className="border rounded-lg py-2 px-4 cursor-pointer"
+                      value={semester}
+                      onChange={(e) => handelSemesters(e.target.value)}
+                    >
+                      <option value="Genap">Genap</option>
+                      <option value="Ganjil">Ganjil</option>
+                    </select>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+        </main>
+      </div>
+    </div>
+  );
+};
+
+
+import { FaArrowUp, FaArrowDown, FaPlus, FaEdit, FaTrash } from "react-icons/fa";
+
+// Definisikan tipe Data dan Ruang sesuai dengan kebutuhan
+interface Data {
+  id: number;
+  no: number;
+  hari: string;
+  waktuMulai: string;
+  waktuAkhir: string;
+  mataKuliah: string;
+  dosen: string;
+  ruang: string;
+  semester: number;
+  kelas: string;
+}
+
+const initialData: Data[] = [
+  { id: 1, no: 1, hari: "Senin", waktuMulai: "08:00", waktuAkhir: "10:00", mataKuliah: "Pemrograman Web", dosen: "Dosen A", ruang: "TI-1", semester: 2, kelas: "A" },
+  { id: 2, no: 2, hari: "Senin", waktuMulai: "10:15", waktuAkhir: "12:15", mataKuliah: "Basis Data", dosen: "Dosen B", ruang: "TI-2", semester: 2, kelas: "A" },
+  { id: 3, no: 3, hari: "Selasa", waktuMulai: "08:00", waktuAkhir: "10:00", mataKuliah: "Jaringan Komputer", dosen: "Dosen C", ruang: "TI-3", semester: 2, kelas: "A" },
+  { id: 4, no: 4, hari: "Selasa", waktuMulai: "10:15", waktuAkhir: "12:15", mataKuliah: "Sistem Operasi", dosen: "Dosen D", ruang: "TI-4", semester: 2, kelas: "A" },
+  { id: 5, no: 5, hari: "Rabu", waktuMulai: "08:00", waktuAkhir: "10:00", mataKuliah: "Analisis dan Perancangan Sistem", dosen: "Dosen E", ruang: "TI-1", semester: 2, kelas: "A" },
+  { id: 6, no: 6, hari: "Rabu", waktuMulai: "10:15", waktuAkhir: "12:15", mataKuliah: "Kecerdasan Buatan", dosen: "Dosen F", ruang: "TI-2", semester: 2, kelas: "A" },
+  { id: 7, no: 7, hari: "Kamis", waktuMulai: "08:00", waktuAkhir: "10:00", mataKuliah: "Rekayasa Perangkat Lunak", dosen: "Dosen G", ruang: "TI-3", semester: 2, kelas: "A" },
+  { id: 8, no: 8, hari: "Kamis", waktuMulai: "10:15", waktuAkhir: "12:15", mataKuliah: "Keamanan Sistem", dosen: "Dosen H", ruang: "TI-4", semester: 2, kelas: "A" },
+  { id: 9, no: 9, hari: "Jumat", waktuMulai: "08:00", waktuAkhir: "10:00", mataKuliah: "Machine Learning", dosen: "Dosen I", ruang: "TI-1", semester: 3, kelas: "A" },
+  { id: 10, no: 10, hari: "Jumat", waktuMulai: "10:15", waktuAkhir: "12:15", mataKuliah: "Pengujian Perangkat Lunak", dosen: "Dosen J", ruang: "TI-2", semester: 2, kelas: "A" },
+  { id: 11, no: 11, hari: "Jumat", waktuMulai: "10:15", waktuAkhir: "12:15", mataKuliah: "Pengujian Perangkat Lunak", dosen: "Dosen J", ruang: "TI-2", semester: 2, kelas: "A" },
+];
+interface Ruang {
+  smstr: number | null;
+  kelas: string | null;
+}
+
+const TableComponent: React.FC<Ruang> = ({ smstr, kelas }) => {
+  const [data, setData] = useState<Data[]>(initialData); // Ganti initialData sesuai dengan data yang Anda miliki
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage, setItemsPerPage] = useState(10);
+  const [filter, setFilter] = useState("");
+  const [sortConfig, setSortConfig] = useState<{ key: keyof Data; direction: "asc" | "desc" } | null>(null);
+
+  const requestSort = (key: keyof Data) => {
+    let direction: "asc" | "desc" = "asc";
+    if (sortConfig && sortConfig.key === key && sortConfig.direction === "asc") {
+      direction = "desc";
+    }
+    setSortConfig({ key, direction });
+  };
+
+  // Filter data berdasarkan input filter
+  const filteredData = data.filter((item) =>
+    item.hari.toLowerCase().includes(filter.toLowerCase()) ||
+    item.mataKuliah.toLowerCase().includes(filter.toLowerCase()) ||
+    item.dosen.toLowerCase().includes(filter.toLowerCase()) ||
+    item.ruang.toLowerCase().includes(filter.toLowerCase()) ||
+    item.kelas.toLowerCase().includes(filter.toLowerCase()) ||
+    item.waktuMulai.toLowerCase().includes(filter.toLowerCase()) ||
+    item.waktuAkhir.toLowerCase().includes(filter.toLowerCase())
+  );
+
+  // Function to parse time from string to Date
+  const parseTime = (timeString: string): Date => {
+    const [hours, minutes] = timeString.split(":").map(Number);
+    const date = new Date();
+    date.setHours(hours, minutes, 0, 0);
+    return date;
+  };
+
+  // Sort data yang telah difilter
+  const sortedFilteredData = (dataToSort: Data[]) => {
+    if (!sortConfig) return dataToSort;
+
+    const { key, direction } = sortConfig;
+
+    return [...dataToSort].sort((a, b) => {
+      let aValue: Date | string | number;
+      let bValue: Date | string | number;
+
+      if (key === "waktuMulai" || key === "waktuAkhir") {
+        aValue = parseTime(String(a[key as keyof Data]));
+        bValue = parseTime(String(b[key as keyof Data]));
+      } else {
+        aValue = a[key as keyof Data];
+        bValue = b[key as keyof Data];
+      }
+
+      if (aValue instanceof Date && bValue instanceof Date) {
+        return direction === "asc" ? aValue.getTime() - bValue.getTime() : bValue.getTime() - aValue.getTime();
+      }
+
+      if (typeof aValue === "string" && typeof bValue === "string") {
+        return direction === "asc"
+          ? aValue.toLowerCase().localeCompare(bValue.toLowerCase())
+          : bValue.toLowerCase().localeCompare(aValue.toLowerCase());
+      } else if (typeof aValue === "number" && typeof bValue === "number") {
+        return direction === "asc" ? aValue - bValue : bValue - aValue;
+      } else {
+        return direction === "asc"
+          ? String(aValue).localeCompare(String(bValue))
+          : String(bValue).localeCompare(String(aValue));
+      }
+    });
+  };
+
+  // Mengatur data yang ditampilkan berdasarkan pagination
+  const paginatedData = sortedFilteredData(filteredData).slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
+
+  const totalPages = Math.ceil(filteredData.length / itemsPerPage); // Hitung total halaman
+
+  const handleNext = () => {
+    if (currentPage < totalPages) {
+      setCurrentPage(currentPage + 1);
+    }
+  };
+
+  const handlePrevious = () => {
+    if (currentPage > 1) {
+      setCurrentPage(currentPage - 1);
+    }
+  };
+
+  return (
+    <div className="p-4">
+      <div className="mb-4 flex justify-between items-center">
+        <h2 className="text-xl font-bold text-blue-600">Tabel Data Jadwal Semester {smstr} Kelas {kelas}</h2>
+        <button className="flex items-center bg-blue-500 text-white px-4 py-2 rounded shadow">
+          <FaPlus className="mr-2" /> Tambah Data
+        </button>
+      </div>
+      <div className="mb-4 flex justify-between items-center">
+        <div>
+          <label className="mr-2">Show</label>
+          <select value={itemsPerPage} onChange={(e) => {
+            setItemsPerPage(Number(e.target.value));
+            setCurrentPage(1); // Reset ke halaman pertama saat mengubah entries
+          }} className="p-2 border rounded">
+            <option value="10">10</option>
+            <option value="25">25</option>
+            <option value="50">50</option>
+          </select>
+          <label className="ml-2">entries</label>
+        </div>
+        <input
+          type="text"
+          placeholder="Search..."
+          value={filter}
+          onChange={(e) => setFilter(e.target.value)}
+          className="p-2 border border-gray-300 rounded"
+        />
+      </div>
+      <table className="min-w-full border-collapse">
+        <thead>
+          <tr>
+          {["No", "Hari", "Waktu Mulai", "Waktu Akhir", "Mata Kuliah", "Dosen", "Ruang", "Semester", "Kelas"].map((header) => (
+            <th
+              key={header}
+              className="border px-4 py-2 cursor-pointer"
+              onClick={() =>
+                requestSort(
+                  header === "Waktu Mulai" ? "waktuMulai" :
+                  header === "Waktu Akhir" ? "waktuAkhir" : 
+                  header.toLowerCase() as keyof Data
+                )
+              }
+              style={{ width: "120px" }} // Set fixed width untuk kolom
+            >
+              <div className="flex justify-center items-center">
+                <div>{header}</div>
+                <span className="ml-2 flex">
+                  <FaArrowUp className={`inline-block ${sortConfig?.key === (header === "Waktu Mulai" ? "waktuMulai" : header === "Waktu Akhir" ? "waktuAkhir" : header.toLowerCase()) && sortConfig.direction === "asc" ? "text-blue-500" : "text-gray-300"}`} />
+                  <FaArrowDown className={`inline-block ml-1 ${sortConfig?.key === (header === "Waktu Mulai" ? "waktuMulai" : header === "Waktu Akhir" ? "waktuAkhir" : header.toLowerCase()) && sortConfig.direction === "desc" ? "text-blue-500" : "text-gray-300"}`} />
+                </span>
+              </div>
+            </th>
+          ))}
+
+            <th className="border p-2" style={{ width: "100px" }}>Action</th>
+          </tr>
+        </thead>
+        <tbody>
+          {paginatedData.map((item) => (
+            <tr key={item.id} className="text-center">
+              <td className="border p-2">{item.no}</td>
+              <td className="border p-2">{item.hari}</td>
+              <td className="border p-2">{item.waktuMulai}</td>
+              <td className="border p-2">{item.waktuAkhir}</td>
+              <td className="border p-2" style={{ width:"200px", height:"60px"}}>
+                {item.mataKuliah}
+              </td>
+              <td className="border p-2">{item.dosen}</td>
+              <td className="border p-2">{item.ruang}</td>
+              <td className="border p-2">{item.semester}</td>
+              <td className="border p-2">{item.kelas}</td>
+              <td className="border p-2 align-middle" style={{ verticalAlign: "middle" }}>
+                <div className="flex justify-center space-x-2">
+                  <button className="text-white bg-green-500 p-2 rounded">
+                    <FaEdit />
+                  </button>
+                  <button className="text-white bg-blue-900 p-2 rounded">
+                    <FaTrash />
+                  </button>
+                </div>
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+      <div className="mt-4 flex justify-between ">
+        <span>
+          Showing {((currentPage - 1) * itemsPerPage) + 1} to {Math.min(currentPage * itemsPerPage, filteredData.length)} of {filteredData.length} entries
+        </span>
+        <div>
+          <button onClick={handlePrevious} disabled={currentPage === 1} className="px-4 mx-2 py-2 bg-gray-300 rounded disabled:opacity-50">
+            Previous
+          </button>
+          <button onClick={handleNext} disabled={currentPage >= totalPages} className="px-4 py-2 bg-gray-300 rounded disabled:opacity-50">
+            Next
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+const NavDash:  React.FC = () => {
+  const [showConfirmation, setShowConfirmation] = useState(false);
+
+  const handleConfirm = () => {
+    setShowConfirmation(true);
+  };
+
+  const handelClose = () => {
+    setShowConfirmation(false);
+  }
+  return (
+      <>
+          <header className="bg-white shadow py-4 px-6">
           <div className="flex justify-between items-center">
             <button className="block lg:hidden">
               <i className="fa fa-bars"></i>
@@ -61,39 +354,12 @@ const Dashboard: React.FC = () => {
             {/* <button onClick={logoutUser} className="text-blue-600">KELUAR</button> */}
             <button onClick={handleConfirm} className="text-blue-600 hover:font-bold transition-all block text-center cursor-pointer"
             style={{ minWidth: '100px' }}>KELUAR</button>
-            { showConfirmation &&  <Confirmation open={showConfirmation} setOpen={setShowConfirmation}/>}                        
+            { showConfirmation &&  <Confirmation open={showConfirmation} setOpen={handelClose}/>}                        
           </div>
         </header>
-
-        <main className="p-6">
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-            <Card title="Jumlah Jadwal" count={jadwalCount} icon={<FaCalendar />} />
-            <Card title="Jumlah Akun" count={accountCount} icon={<FaUsers />} />
-
-            <div className="col-span-1">
-              <div className="bg-white p-4 rounded-lg shadow-lg">
-                <div className="flex justify-between items-center">
-                  <div>
-                    <h5 className="text-lg font-bold text-gray-600">Semester</h5>
-                    <p className="text-gray-800 font-bold">{semester}</p>
-                  </div>
-                  <select
-                    className="border rounded-lg py-2 px-4 cursor-pointer"
-                    value={semester}
-                    onChange={(e) => setSemester(e.target.value)}
-                  >
-                    <option value="Genap">Genap</option>
-                    <option value="Ganjil">Ganjil</option>
-                  </select>
-                </div>
-              </div>
-            </div>
-          </div>
-        </main>
-      </div>
-    </div>
+    </>
   );
-};
+}
 
 const Card: React.FC<{ title: string; count: number; icon: JSX.Element }> = ({ title, count, icon }) => {
   return (
@@ -107,68 +373,73 @@ const Card: React.FC<{ title: string; count: number; icon: JSX.Element }> = ({ t
   );
 };
 
-type Jadwal = {
+interface Jadwal  {
     jadwal: number;
     smstr: number;
+    onSelectClass: (params: string | null,param2: number | null) => void;
 }
-const JadwalSemester: React.FC<Jadwal> = ({ jadwal, smstr }) => {
-    const [isOpen, setIsOpen] = useState<number | null>(null);
 
-    const toggleDropdown = (sms:number) => {
-      setIsOpen(sms);
-      if(isOpen != null) {
-        setIsOpen(null);
-      }
-    };
-    const list = [];
-    const semester = [1,2,3,4,5,6];
-    for (let i=0; i < jadwal ; i++) {
-        list.push(
-            <div className="w-full ">
-            <button
-              className="flex items-center w-full px-4 py-2 text-left text-white rounded-lg focus:bg-blue-900 hover:bg-blue-900"
-              onClick={() => toggleDropdown(i)}
-            >
-              <FaCalendar className="mr-2 " />
-              <span>Jadwal Semester {smstr == 0 ? semester[(i*2)+1] : semester[i*2] }</span>
-              <FaChevronDown
-                className={`ml-auto transform transition-transform duration-300 ${
-                  isOpen == i ? 'rotate-120' : '-rotate-90'
-                }`}
-              />
-            </button>
-            {/* Dropdown with animation */}
-            <div
-              className={`ml-6 mr-4 mt-2 space-y-2 overflow-hidden transition-all duration-300 ease-in-out ${
-                isOpen == i ? 'max-h-96' : 'max-h-0'
-              }`}
-            >
-              <a href="/jadwal/semester2/kelasA" className="block foucus:hover:bg-blue-900 rounded-lg py-2 px-1">
-                Kelas A
-              </a>
-              <a href="/jadwal/semester2/kelasB" className="block hover:bg-blue-900 rounded-lg py-2 px-1">
-                Kelas B
-              </a>
-              <a href="/jadwal/semester2/kelasC" className="block hover:bg-blue-900 rounded-lg py-2 px-1">
-                Kelas C
-              </a>
-              <a href="/jadwal/semester2/kelasD" className="block hover:bg-blue-900 rounded-lg py-2 px-1">
-                Kelas D
-              </a>
-              <a href="/jadwal/semester2/kelasE" className="block hover:bg-blue-900 rounded-lg py-2 px-1">
-                Kelas E
-              </a>
-            </div>
-          </div>
-        );
+
+
+const JadwalSemester: React.FC<Jadwal> = ({ jadwal, smstr, onSelectClass}) => {
+  const [isOpen, setIsOpen] = useState<number | null>(null);
+
+  const toggleDropdown = (sms: number) => {
+    setIsOpen(sms);
+    if (isOpen != null) {
+      setIsOpen(null);
     }
-    return (
-        <>
-            {
-                list
-            }
-        </>
-    );
   };
+  const list = [];
+  const semester = [1, 2, 3, 4, 5, 6];
+  
+  for (let i = 0; i < jadwal; i++) {
+    const genap =  semester[(i * 2) + 1];
+    const ganjil = semester[i * 2];
+    const sms = smstr == 0 ? genap : ganjil ;
+    list.push(
+      <div className="w-full " key={i} >
+        <button
+          className={`flex items-center w-full px-4 py-2 text-left text-white hover:bg-blue-900 focus:bg-blue-900`}
+          onClick={() => toggleDropdown(i)}
+        >
+          <FaCalendar className="mr-2 " />
+          <span>Jadwal Semester {sms}</span>
+          <FaChevronDown
+            className={`ml-auto transform transition-transform duration-300 ${
+              isOpen == i ? 'rotate-120' : '-rotate-90'
+            }`}
+          />
+        </button>
+        {/* Dropdown with animation */}
+        <div
+          className={`ml-6 mr-4 mt-2 space-y-2 overflow-hidden transition-all duration-300 ease-in-out ${
+            isOpen == i ? 'max-h-96' : 'max-h-0'
+          }`}
+        >
+          {
+          ["A","B","D","E"].map((value) => ( 
+            <>
+              <button
+                className="block hover:bg-blue-900 rounded-lg py-2 px-1 w-full text-left focus:bg-blue-900"
+                onClick={() => onSelectClass(`${value}`,sms)}
+              >
+                Kelas {value}
+              </button>
+            </>
+          ))
+          
+          }
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <>
+      {list}
+    </>
+  );
+};
   
 export default Dashboard;

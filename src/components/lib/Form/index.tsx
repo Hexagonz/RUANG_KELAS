@@ -122,6 +122,7 @@ const Form: React.FC<Btn> = ({ name }) => {
                 </div>
             </div>
             <input type="submit" value={name} className="bg-[#1E2A5E] text-white w-full mt-10 p-4 font-bold text-xl rounded-[5px] cursor-pointer hover:bg-[#0f1636]" />
+            {(validate.error || error )&& <p className='text-lg text-red-500 text-center items-center py-2'>{validate.error || error}</p>}
         </form>
     </>;
 }

@@ -6,7 +6,7 @@ import { FaFacebook, FaInstagram } from "react-icons/fa";
 const Footer:  React.FC = () => {
     return (
         <>
-            <footer className="bg-[#1E3163] py-12 mt-32 text-white">
+            <footer className="bg-[#1E3163] py-12 text-white">
             <div className="container bg-[#1E3163]  pt-14 mx-auto px-4 ">
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
                 {/* Kolom Gedung Teori */}

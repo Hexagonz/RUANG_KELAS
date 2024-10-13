@@ -1,4 +1,4 @@
-import { Link, useNavigate } from "react-router-dom";
+import { Link, Navigate } from "react-router-dom";
 type Card = {
     isHovered: boolean;
     rl: string;
@@ -17,9 +17,9 @@ const KelasCard: React.FC<Card> = ({ isHovered, rl }) => {
           <div className="details flex justify-between items-center w-full mt-10 pr-4 ">
             {
             token ?
-            <Link to="/details" className="bg-white py-2 px-4 text-black rounded hover:bg-gray-500">Detail Kelas</Link> 
+            <a href="/details" className="bg-white py-2 px-4 text-black rounded hover:bg-gray-500">Detail Kelas</a> 
             :
-            <Link to="/login" className="bg-white py-2 px-4 text-black rounded hover:bg-gray-500">Detail Kelas</Link>
+            <a href="/login" className="bg-white py-2 px-4 text-black rounded hover:bg-gray-500">Detail Kelas</a>
             }  
             <div className="details flex items-center justify-between gap-5">
                 <p>RUANGAN TERSEDIA</p>

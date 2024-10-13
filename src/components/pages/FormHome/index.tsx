@@ -6,7 +6,9 @@ const FormHome: React.FC = () => {
         <>  
             <Navbar onShow={false}/>
             <Hero />
+        <div className="mb-24">
             <Room />
+        </div>
             <Footer />
         </>
     );
