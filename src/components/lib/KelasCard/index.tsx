@@ -17,7 +17,7 @@ const KelasCard: React.FC<Card> = ({ isHovered, rl }) => {
           <div className="details flex justify-between items-center w-full mt-10 pr-4 ">
             {
             token ?
-            <a href="/details" className="bg-white py-2 px-4 text-black rounded hover:bg-gray-500">Detail Kelas</a> 
+            <Link to="/details" className="bg-white py-2 px-4 text-black rounded hover:bg-gray-500">Detail Kelas</Link> 
             :
             <a href="/login" className="bg-white py-2 px-4 text-black rounded hover:bg-gray-500">Detail Kelas</a>
             }  

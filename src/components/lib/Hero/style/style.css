@@ -4,45 +4,11 @@
     font-family: "Poppins", sans-serif;
 }
 
+
 article {
-    position: relative;
-    width: 100%;
-    height: 100vh;
-    background: linear-gradient(to bottom, rgba(0, 0, 0, 0.4), rgba(0, 0, 0, 0.4));
-    z-index: 0;
+    background: linear-gradient(to bottom, rgba(0, 0, 0, 0.4), rgba(0, 0, 0, 0.4)), url("../assets/image/ti13.png") no-repeat; 
+    -webkit-background-size: cover;   
 }
-
-.background1, .background2 {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background-size: cover;
-    background-position: center;
-    z-index: 1;
-}
-
-.background1 {
-    background-image: url("../assets/image/ti13.png");
-    animation: fadeBackground 5s infinite;
-}
-
-.background2 {
-    background-image: url("../assets/image/ling.jpeg");
-    animation: fadeBackground 5s infinite;
-    animation-delay: 2.5s;
-}
-
-@keyframes fadeBackground {
-    0%, 100% {
-        opacity: 0;
-    }
-    50% {
-        opacity: 1;
-    }
-}
-
 
 .container {
     background-color: rgba(255,243, 227, 0.75);

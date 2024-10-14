@@ -1,7 +1,7 @@
-import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import { BrowserRouter as Router, Routes, Route, useLocation } from "react-router-dom";
 import { FormLogin, FormHome, NotFound, Dashboard, FormDetails } from "./components/pages"
 import { Navigate } from 'react-router-dom';
-
+import { useEffect } from "react";
 export interface PrivateRouteProps {
   children: React.ReactElement;
 }
@@ -12,27 +12,40 @@ const PrivateRoute: React.FC<PrivateRouteProps> = ({ children }) => {
 };
 
 
+const ScrollToTop: React.FC = () => {
+  const { pathname } = useLocation();
+
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, [pathname]);
+
+  return null; 
+};
+
 const App: React.FC = () => {
   return (
-    <Router>
-      <Routes>
-          <Route path="/" element={<FormHome />} />
-          <Route path="/login" element={<FormLogin />}/>
-            <Route path="/dashboard" element={
-              <PrivateRoute>
-                <Dashboard />
-              </PrivateRoute>
-            }/>
-            <Route path="/details" element={
-              <PrivateRoute>
-                <FormDetails />
-              </PrivateRoute>
-            }/>
+    <>
+      <Router>
+      <ScrollToTop/>
+        <Routes>
+            <Route path="/" element={<FormHome />} />
+            <Route path="/login" element={<FormLogin />}/>
+              <Route path="/dashboard" element={
+                <PrivateRoute>
+                  <Dashboard />
+                </PrivateRoute>
+              }/>
+              <Route path="/details" element={
+                <PrivateRoute>
+                  <FormDetails />
+                </PrivateRoute>
+              }/>
 
-          {/* <Route path="/jadwal" element={<FormLogin />}/> */}
-          <Route path="*" element={<NotFound />}/>
-      </Routes>
-    </Router>
+            {/* <Route path="/jadwal" element={<FormLogin />}/> */}
+            <Route path="*" element={<NotFound />}/>
+        </Routes>
+      </Router>
+    </>
   );
 }
 

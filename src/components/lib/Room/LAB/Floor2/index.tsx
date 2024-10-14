@@ -2,6 +2,7 @@ import ladder from "../../assets/ladder_up.svg";
 import { KelasCard } from "../../../../lib";
 import { useState } from "react";
 
+
 const Floor2: React.FC = () => {
     const [hoveredClass, setHoveredClass] = useState<string | null>(null);
 
@@ -12,15 +13,18 @@ const Floor2: React.FC = () => {
     const handleMouseLeave = () => {
       setHoveredClass(null);
     };
-    const handleClick = (id:string): void => {
+    const handleClick = (id: string): void => {
         const elementID: HTMLElement | null = document.getElementById(id);
-        elementID?.scrollIntoView({ behavior: "smooth", block:"start"});
-    }
+        elementID?.scrollIntoView({
+          behavior: "smooth",
+          block: "start" as ScrollLogicalPosition, // or block: 0
+        });
+    };
 
     return (
         <>
             <div className="content *:text-center pt-28 py-12 text-[#333333]">
-                <h4 className="font-bold text-3xl" id="floor-2">Denah Gedung LAB Lantai 2</h4>
+                <h4 className="scroll-smooth font-bold text-3xl" id="floor-2">Denah Gedung LAB Lantai 2</h4>
                 <p className="text-xl">Menyediakan Ruangan</p>
             </div> 
             <div className="location w-[55%] mx-auto bg-[#DDF2FD] h-max py-8 rounded-[10px] shadow-[4.0px_8.0px_8.0px_rgba(0,0,0,0.38)] relative">

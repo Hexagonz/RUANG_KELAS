@@ -24,10 +24,8 @@ const Dashboard: React.FC = () => {
   }
   
   useEffect(() => {
-    setJadwalCount(10); // Contoh data jadwal
-    setAccountCount(5); // Contoh data akun
-    // Fokus otomatis pada tombol Dashboard
-    // localStorage.setItem("semester","Genap");
+    setJadwalCount(10); 
+    setAccountCount(5);
     if(!localStorage.getItem("semester")) {
       localStorage.setItem("semester",semester);
     } else {
@@ -75,7 +73,6 @@ const Dashboard: React.FC = () => {
           {selectedClass ? (
               <>
                 <TableComponent smstr={selectedSms} kelas={selectedClass}/>
-                
               </>
           ) : (
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
@@ -90,7 +87,7 @@ const Dashboard: React.FC = () => {
                       <p className="text-gray-800 font-bold">{semester}</p>
                     </div>
                     <select
-                      className="border rounded-lg py-2 px-4 cursor-pointer"
+                      className="border rounded-lg py-2 px-4 cursor-pointer w-[20%]"
                       value={semester}
                       onChange={(e) => handelSemesters(e.target.value)}
                     >
@@ -149,6 +146,15 @@ const TableComponent: React.FC<Ruang> = ({ smstr, kelas }) => {
   const [itemsPerPage, setItemsPerPage] = useState(10);
   const [filter, setFilter] = useState("");
   const [sortConfig, setSortConfig] = useState<{ key: keyof Data; direction: "asc" | "desc" } | null>(null);
+  const [showForm, setShowForm] = useState(false);
+
+  const handleForm = () => {
+    setShowForm(true);
+  }
+
+  const handleCloseForm = () => {
+    setShowForm(false);
+  }
 
   const requestSort = (key: keyof Data) => {
     let direction: "asc" | "desc" = "asc";
@@ -212,10 +218,7 @@ const TableComponent: React.FC<Ruang> = ({ smstr, kelas }) => {
       }
     });
   };
-
-  // Mengatur data yang ditampilkan berdasarkan pagination
   const paginatedData = sortedFilteredData(filteredData).slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
-
   const totalPages = Math.ceil(filteredData.length / itemsPerPage); // Hitung total halaman
 
   const handleNext = () => {
@@ -234,9 +237,10 @@ const TableComponent: React.FC<Ruang> = ({ smstr, kelas }) => {
     <div className="p-4">
       <div className="mb-4 flex justify-between items-center">
         <h2 className="text-xl font-bold text-blue-600">Tabel Data Jadwal Semester {smstr} Kelas {kelas}</h2>
-        <button className="flex items-center bg-blue-500 text-white px-4 py-2 rounded shadow">
+        <button onClick={handleForm} className="flex items-center bg-blue-500 text-white px-4 py-2 rounded shadow hover:bg-blue-600">
           <FaPlus className="mr-2" /> Tambah Data
         </button>
+        { showForm &&  <TambahData open={showForm} setOpen={handleCloseForm} semester={smstr} kelas={kelas}/>}
       </div>
       <div className="mb-4 flex justify-between items-center">
         <div>
@@ -340,6 +344,7 @@ const NavDash:  React.FC = () => {
     setShowConfirmation(true);
   };
 
+  
   const handelClose = () => {
     setShowConfirmation(false);
   }
@@ -360,6 +365,256 @@ const NavDash:  React.FC = () => {
     </>
   );
 }
+
+// 'use client'
+
+// import { useState } from 'react';
+import { Dialog, Transition } from '@headlessui/react';
+import { Fragment } from 'react';
+import { XMarkIcon } from '@heroicons/react/24/outline'; // Pastikan Anda sudah menginstal heroicons
+import Select, { StylesConfig } from 'react-select';
+
+// Tipe untuk opsi Select
+type Option = {
+  value: string;
+  label: string;
+  isDisabled?: boolean;
+};
+
+interface Confirm {
+  open: boolean;
+  setOpen: (open: boolean) => void;
+  semester: number | null ;
+  kelas: string | null;
+}
+
+const TambahData: React.FC<Confirm> = ({ open, setOpen, semester, kelas }) => {
+
+  const hariOptions: Option[] = [
+    { value: 'Senin', label: 'Senin' },
+    { value: 'Selasa', label: 'Selasa' },
+    { value: 'Rabu', label: 'Rabu' },
+    { value: 'Kamis', label: 'Kamis' },
+    { value: 'Jumat', label: 'Jumat' },
+    { value: 'Sabtu', label: 'Sabtu' },
+  ];
+
+  const mataKuliahOptions: Option[] = [
+    { value: 'MK1', label: 'Matematika' },
+    { value: 'MK2', label: 'Fisika' },
+    { value: 'MK3', label: 'Kimia' },
+  ];
+
+  const dosenOptions: Option[] = [
+    { value: 'DS1', label: 'Dr. Budi' },
+    { value: 'DS2', label: 'Dr. Ani' },
+    { value: 'DS3', label: 'Prof. Rina' },
+  ];
+
+  const ruangOptions: Option[] = [
+    { value: 'R101', label: 'R101' },
+    { value: 'R102', label: 'R102' },
+    { value: 'R103', label: 'R103' },
+  ];
+
+  const semesterOptions: Option[] = [
+    { value: `${semester}`, label: `Semester ${semester}`, isDisabled: true }, // Semester 2 disabled
+  ];
+
+  const kelasOptions: Option[] = [
+    { value: `${kelas}`, label: `Kelas ${kelas}`, isDisabled: true }, // Kelas A disabled
+  ];
+
+  // Opsi untuk waktu mulai dan akhir
+  const timeOptions: Option[] = Array.from({ length: 24 * 4 }, (_, i) => {
+    const hours = String(Math.floor(i / 4)).padStart(2, '0');
+    const minutes = String((i % 4) * 15).padStart(2, '0');
+    return { value: `${hours}:${minutes}`, label: `${hours}:${minutes}` };
+  });
+
+  // Custom styles for react-select
+  const customStyles: StylesConfig<Option> = {
+    control: (provided) => ({
+      ...provided,
+      padding: '8px',
+      borderColor: 'gray',
+      boxShadow: 'none',
+      '&:hover': {
+        borderColor: 'blue',
+      },
+    }),
+  };
+
+  return (
+    <Transition.Root show={open} as={Fragment}>
+      <Dialog as="div" className="relative z-10" onClose={setOpen}>
+        <Transition.Child
+          as={Fragment}
+          enter="ease-out duration-300"
+          enterFrom="opacity-0"
+          enterTo="opacity-100"
+          leave="ease-in duration-200"
+          leaveFrom="opacity-100"
+          leaveTo="opacity-0"
+        >
+          <div className="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity" />
+        </Transition.Child>
+
+        <div className="fixed inset-0 z-10 overflow-y-auto">
+          <div className="flex min-h-full items-center justify-center p-4 text-center sm:items-center sm:p-0">
+            <Transition.Child
+              as={Fragment}
+              enter="ease-out duration-300"
+              enterFrom="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
+              enterTo="opacity-100 translate-y-0 sm:scale-100"
+              leave="ease-in duration-200"
+              leaveFrom="opacity-100 translate-y-0 sm:scale-100"
+              leaveTo="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
+            >
+              <Dialog.Panel className="relative transform overflow-hidden rounded-lg bg-white text-left shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-lg">
+                <div className="bg-white px-6 py-5 sm:p-6">
+                  <div className="sm:flex sm:items-start">
+                    <button
+                      type="button"
+                      className="absolute top-2 right-2 text-gray-400 hover:text-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 rounded-md"
+                      onClick={() => setOpen(false)}
+                    >
+                      <span className="sr-only">Close</span>
+                      <XMarkIcon className="h-6 w-6" aria-hidden="true" />
+                    </button>
+                    <div className="mt-3 w-full text-center sm:mt-0 sm:text-left">
+                      <Dialog.Title as="h3" className="text-lg leading-6 font-medium text-gray-900">
+                        Menambah Jadwal Baru
+                      </Dialog.Title>
+                      <form className="mt-5 space-y-4">
+                        <div>
+                          <label htmlFor="hari" className="block text-sm font-medium text-gray-700">
+                            Hari
+                          </label>
+                          <Select
+                            id="hari"
+                            options={hariOptions}
+                            className="mt-1"
+                            placeholder="Pilih Hari"
+                            isSearchable
+                            styles={customStyles}
+                          />
+                        </div>
+                        <div>
+                          <label htmlFor="waktu-mulai" className="block text-sm font-medium text-gray-700">
+                            Waktu Mulai
+                          </label>
+                          <Select
+                            id="waktu-mulai"
+                            options={timeOptions}
+                            className="mt-1"
+                            placeholder="Pilih Waktu Mulai"
+                            isSearchable
+                            styles={customStyles}
+                          />
+                        </div>
+                        <div>
+                          <label htmlFor="waktu-akhir" className="block text-sm font-medium text-gray-700">
+                            Waktu Akhir
+                          </label>
+                          <Select
+                            id="waktu-akhir"
+                            options={timeOptions}
+                            className="mt-1"
+                            placeholder="Pilih Waktu Akhir"
+                            isSearchable
+                            styles={customStyles}
+                          />
+                        </div>
+                        <div>
+                          <label htmlFor="mata-kuliah" className="block text-sm font-medium text-gray-700">
+                            Mata Kuliah
+                          </label>
+                          <Select
+                            id="mata-kuliah"
+                            options={mataKuliahOptions}
+                            className="mt-1"
+                            placeholder="Pilih Mata Kuliah"
+                            isSearchable
+                            styles={customStyles}
+                          />
+                        </div>
+                        <div>
+                          <label htmlFor="dosen" className="block text-sm font-medium text-gray-700">
+                            Dosen
+                          </label>
+                          <Select
+                            id="dosen"
+                            options={dosenOptions}
+                            className="mt-1"
+                            placeholder="Pilih Dosen"
+                            isSearchable
+                            styles={customStyles}
+                          />
+                        </div>
+                        <div>
+                          <label htmlFor="ruang" className="block text-sm font-medium text-gray-700">
+                            Ruang
+                          </label>
+                          <Select
+                            id="ruang"
+                            options={ruangOptions}
+                            className="mt-1"
+                            placeholder="Pilih Ruang"
+                            isSearchable
+                            styles={customStyles}
+                          />
+                        </div>
+                        <div>
+                          <label htmlFor="semester" className="block text-sm font-medium text-gray-700">
+                            Semester
+                          </label>
+                          <Select
+                            id="semester"
+                            options={semesterOptions}
+                            defaultValue={semesterOptions[0]} // Semester 2 disabled
+                            className="mt-1"
+                            placeholder="Pilih Semester"
+                            isSearchable
+                            styles={customStyles}
+                            isDisabled
+                          />
+                        </div>
+                        <div>
+                          <label htmlFor="kelas" className="block text-sm font-medium text-gray-700">
+                            Kelas
+                          </label>
+                          <Select
+                            id="kelas"
+                            defaultValue={kelasOptions[0]} // Kelas A disabled
+                            className="mt-1"
+                            isSearchable
+                            styles={customStyles}
+                            isDisabled
+                          />
+                        </div>
+                        <div className="mt-5 sm:mt-6 flex justify-end">
+                          <button 
+                          onClick={() => setOpen(false)}
+                            type="button"
+                            className="inline-flex justify-center rounded-md border border-transparent bg-blue-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+                            >
+                            Simpan Jadwal
+                          </button>
+                        </div>
+                      </form>
+                    </div>
+                  </div>
+                </div>
+              </Dialog.Panel>
+            </Transition.Child>
+          </div>
+        </div>
+      </Dialog>
+    </Transition.Root>
+  );
+};
+
 
 const Card: React.FC<{ title: string; count: number; icon: JSX.Element }> = ({ title, count, icon }) => {
   return (
