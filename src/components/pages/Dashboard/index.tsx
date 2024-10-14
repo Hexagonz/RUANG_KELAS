@@ -1,7 +1,10 @@
 import React, { useEffect, useState, useRef} from 'react';
 import { Link  } from "react-router-dom"
 import { Confirmation } from '../../lib';
-import { FaCalendar, FaUsers, FaTachometerAlt, FaChevronDown  } from 'react-icons/fa';
+import { FaCalendar, FaUsers, FaTachometerAlt, FaChevronDown, FaChalkboardTeacher  } from 'react-icons/fa';
+import { SiGoogleclassroom } from "react-icons/si";
+import { IoBookSharp } from "react-icons/io5";
+import { TbAirConditioning } from "react-icons/tb";
 import "./style/style.css";
 
 
@@ -11,33 +14,40 @@ const Dashboard: React.FC = () => {
   const [semester, setSemester] = useState<string>("Genap");
   const [selectedClass, setSelectedClass] = useState<string | null>(null);
   const [selectedSms, setSelectedSms] = useState<number | null>(null);
+  const [selectedView, setSelectedView] = useState<string>("Dashboard");
   const dashboardButtonRef = useRef<HTMLButtonElement | null>(null);
 
   const handleSelectClass = (className: string | null, smstr: number | null) => {
     setSelectedClass(className);
     setSelectedSms(smstr);
+    setSelectedView("JadwalSemester");
   };
 
   const handelSemesters = (value: string) => {
     setSemester(value);
-    localStorage.setItem("semester",value);
-  }
-  
+    localStorage.setItem("semester", value);
+  };
+
+  const handleSelectView = (view: string) => {
+    setSelectedView(view);
+    setSelectedClass(null); // Reset selected class
+  };
+
   useEffect(() => {
-    setJadwalCount(10); 
+    setJadwalCount(10);
     setAccountCount(5);
-    if(!localStorage.getItem("semester")) {
-      localStorage.setItem("semester",semester);
+    if (!localStorage.getItem("semester")) {
+      localStorage.setItem("semester", semester);
     } else {
       const storage = localStorage.getItem("semester") as string;
       setSemester(storage);
     }
-    if(selectedClass == null) {
-      dashboardButtonRef.current!.style.backgroundColor = 'rgb(30 58 138/1)' ;
+    if (selectedClass == null) {
+      dashboardButtonRef.current!.style.backgroundColor = "rgb(30 58 138/1)";
     } else {
-      dashboardButtonRef.current!.style.backgroundColor = '' ;
+      dashboardButtonRef.current!.style.backgroundColor = "";
     }
-  }, [selectedClass,semester]);
+  }, [selectedClass, semester]);
 
   return (
     <div className="min-h-screen bg-gray-100 flex">
@@ -50,14 +60,46 @@ const Dashboard: React.FC = () => {
           <hr className="my-4 border-gray-400" />
           <nav className="space-y-2">
             <button
-              ref={dashboardButtonRef} 
-              onClick={() => handleSelectClass(null,null)}
+              ref={dashboardButtonRef}
+              onClick={() => handleSelectView("Dashboard")}
               className="flex items-center px-4 py-2 text-white hover:bg-blue-900 w-full"
             >
               <FaTachometerAlt className="mr-2" />
               <span>Dashboard</span>
             </button>
-            <JadwalSemester jadwal={3} smstr={semester == "Genap" ? 0 : 1 } onSelectClass={handleSelectClass}/>
+            <button
+              onClick={() => handleSelectView("Dosen")}
+              className="flex items-center px-4 py-2 text-white hover:bg-blue-900 w-full"
+            >
+              <FaChalkboardTeacher className="mr-2" />
+              <span>Dosen</span>
+            </button>
+            <button
+              onClick={() => handleSelectView("Mata Kuliah")}
+              className="flex items-center px-4 py-2 text-white hover:bg-blue-900 w-full"
+            >
+              <IoBookSharp className="mr-2" />
+              <span>Mata Kuliah</span>
+            </button>
+            <button
+              onClick={() => handleSelectView("Kelas")}
+              className="flex items-center px-4 py-2 text-white hover:bg-blue-900 w-full"
+            >
+              <SiGoogleclassroom className="mr-2" />
+              <span>Kelas</span>
+            </button>
+            <button
+              onClick={() => handleSelectView("Fasilitas")}
+              className="flex items-center px-4 py-2 text-white hover:bg-blue-900 w-full"
+            >
+              <TbAirConditioning className="mr-2" />
+              <span>Fasilitas</span>
+            </button>
+            <JadwalSemester
+              jadwal={3}
+              smstr={semester === "Genap" ? 0 : 1}
+              onSelectClass={handleSelectClass}
+            />
             <a href="/akun" className="flex items-center px-4 py-2">
               <FaUsers className="mr-2" />
               <span>Akun</span>
@@ -68,13 +110,9 @@ const Dashboard: React.FC = () => {
 
       {/* Main Content */}
       <div className="flex flex-col flex-1">
-      <NavDash/>
+        <NavDash />
         <main className="slide-page p-6">
-          {selectedClass ? (
-              <>
-                <TableComponent smstr={selectedSms} kelas={selectedClass}/>
-              </>
-          ) : (
+          {selectedView === "Dashboard" && (
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
               <Card title="Jumlah Jadwal" count={jadwalCount} icon={<FaCalendar />} />
               <Card title="Jumlah Akun" count={accountCount} icon={<FaUsers />} />
@@ -99,12 +137,18 @@ const Dashboard: React.FC = () => {
               </div>
             </div>
           )}
+          {selectedView === "Dosen" && <div>Konten Dosen</div>}
+          {selectedView === "Mata Kuliah" && <div>Konten Mata Kuliah</div>}
+          {selectedView === "Kelas" && <div>Konten Kelas</div>}
+          {selectedView === "Fasilitas" && <div>Konten Fasilitas</div>}
+          {selectedView === "JadwalSemester" && selectedClass && (
+            <TableComponent smstr={selectedSms} kelas={selectedClass} />
+          )}
         </main>
       </div>
     </div>
   );
 };
-
 
 import { FaArrowUp, FaArrowDown, FaPlus, FaEdit, FaTrash } from "react-icons/fa";
 
