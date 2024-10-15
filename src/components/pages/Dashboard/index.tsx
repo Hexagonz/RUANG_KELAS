@@ -145,9 +145,9 @@ const Dashboard: React.FC = () => {
             </div>
           )}
           {selectedView === "Dosen" &&  <> <TableDosen /></>}
-          {selectedView === "Mata Kuliah" && <div>Konten Mata Kuliah</div>}
+          {selectedView === "Mata Kuliah" && <><TableMakul/></>}
           {selectedView === "Kelas" && <div>Konten Kelas</div>}
-          {selectedView === "Fasilitas" && <div>Konten Fasilitas</div>}
+          {selectedView === "Fasilitas" && <><TableFasilitas/></>}
           {selectedView === "JadwalSemester" && selectedClass && (
             <TableJadwal smstr={selectedSms} kelas={selectedClass} />
           )}
@@ -598,34 +598,360 @@ const TableDosen: React.FC = () => {
 };
 
 
-const NavDash:  React.FC = () => {
+const NavDash: React.FC = () => {
   const [showConfirmation, setShowConfirmation] = useState(false);
 
   const handleConfirm = () => {
     setShowConfirmation(true);
   };
 
-  
-  const handelClose = () => {
+  const handleClose = () => {
     setShowConfirmation(false);
-  }
-  return (
-      <>
-          <header className="bg-white shadow py-4 px-6">
-          <div className="flex justify-between items-center">
-            <button className="block lg:hidden">
-              <i className="fa fa-bars"></i>
-            </button>
+  };
 
-            {/* <button onClick={logoutUser} className="text-blue-600">KELUAR</button> */}
-            <button onClick={handleConfirm} className="text-blue-600 hover:font-bold transition-all block text-center cursor-pointer"
-            style={{ minWidth: '100px' }}>KELUAR</button>
-            { showConfirmation &&  <Confirmation open={showConfirmation} setOpen={handelClose}/>}                        
-          </div>
-        </header>
+  return (
+    <>
+      <header className="bg-white shadow py-4 px-6">
+        <div className="flex justify-between items-center">
+          {/* Button for mobile navigation (optional) */}
+          <button className="block lg:hidden">
+            <i className="fa fa-bars"></i>
+          </button>
+
+          {/* Logout Button */}
+          <button
+            onClick={handleConfirm}
+            className="text-blue-600 hover:font-bold transition-all block text-center cursor-pointer"
+            style={{ minWidth: '100px' }}
+          >
+            KELUAR
+          </button>
+
+          {/* Confirmation Modal */}
+          {showConfirmation && (
+            <Confirmation open={showConfirmation} setOpen={handleClose} />
+          )}
+        </div>
+      </header>
     </>
   );
+};
+
+interface Makul {
+  id: number;
+  namaMakul: string;
+  sks: number;
+  namaDosen: string;
 }
+
+const initialDataMakul: Makul[] = [
+  { id: 1, namaMakul: "Pemrograman Web", sks: 3, namaDosen: "Dosen A" },
+  { id: 2, namaMakul: "Basis Data", sks: 4, namaDosen: "Dosen B" },
+  { id: 3, namaMakul: "Struktur Data", sks: 3, namaDosen: "Dosen C" },
+];
+
+const TableMakul: React.FC = () => {
+  const [data, setData] = useState<Makul[]>(initialDataMakul);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage, setItemsPerPage] = useState(10);
+  const [filter, setFilter] = useState("");
+  const [showForm, setShowForm] = useState(false);
+  const [newNamaMakul, setNewNamaMakul] = useState("");
+  const [newSks, setNewSks] = useState<number>(0);
+  const [newNamaDosen, setNewNamaDosen] = useState("");
+
+  const handleForm = () => {
+    setShowForm(true);
+  };
+
+  const handleCloseForm = () => {
+    setShowForm(false);
+  };
+
+  const handleAddMakul = () => {
+    const newMakul: Makul = {
+      id: data.length + 1, 
+      namaMakul: newNamaMakul,
+      sks: newSks,
+      namaDosen: newNamaDosen,
+    };
+    setData([...data, newMakul]);
+    setShowForm(false); 
+    setNewNamaMakul("");
+    setNewSks(0);
+    setNewNamaDosen("");
+  };
+
+  const filteredData = data.filter((item) =>
+    item.namaMakul.toLowerCase().includes(filter.toLowerCase()) ||
+    item.namaDosen.toLowerCase().includes(filter.toLowerCase())
+  );
+  
+  const paginatedData = filteredData.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
+  const totalPages = Math.ceil(filteredData.length / itemsPerPage);
+
+  const handleNext = () => {
+    if (currentPage < totalPages) {
+      setCurrentPage(currentPage + 1);
+    }
+  };
+
+  const handlePrevious = () => {
+    if (currentPage > 1) {
+      setCurrentPage(currentPage - 1);
+    }
+  };
+
+    return (
+      <div className="p-4">
+      <div className="mb-4 flex justify-between items-center">
+        <h2 className="text-xl font-bold text-blue-600">Tabel Data Mata Kuliah</h2>
+        <button onClick={handleForm} className="flex items-center bg-blue-500 text-white px-4 py-2 rounded shadow hover:bg-blue-600">
+          <FaPlus className="mr-2" /> Tambah Data
+        </button>
+        {showForm && <TambahDataMakul open={showForm} setOpen={handleCloseForm} />}
+      </div>
+      <div className="mb-4 flex justify-between items-center">
+        <div>
+          <label className="mr-2">Show</label>
+          <select
+            value={itemsPerPage}
+            onChange={(e) => {
+              setItemsPerPage(Number(e.target.value));
+              setCurrentPage(1);
+            }}
+            className="p-2 border rounded"
+          >
+            <option value="10">10</option>
+            <option value="25">25</option>
+            <option value="50">50</option>
+          </select>
+          <label className="ml-2">entries</label>
+        </div>
+        <input
+          type="text"
+          placeholder="Search..."
+          value={filter}
+          onChange={(e) => setFilter(e.target.value)}
+          className="p-2 border border-gray-300 rounded"
+        />
+      </div>
+      <table className="min-w-full border-collapse">
+        <thead>
+          <tr>
+            {["No", "Nama Mata Kuliah", "SKS", "Nama Dosen"].map((header) => (
+              <th key={header} className="border px-4 py-2">{header}</th>
+            ))}
+            <th className="border p-2">Action</th>
+          </tr>
+        </thead>
+        <tbody>
+          {filteredData
+            .slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage)
+            .map((item, index) => (
+              <tr key={item.id} className="text-center">
+                <td className="border px-4 py-2 ">{index + 1 + (currentPage - 1) * itemsPerPage}</td>
+                <td className="border px-4 py-2">{item.namaMakul}</td>
+                <td className="border px-4 py-2">{item.sks}</td>
+                <td className="border px-4 py-2">{item.namaDosen}</td>
+                <td className="border px-4 py-2">
+                  <button className="text-white bg-green-500 p-2 rounded mr-2">
+                  <FaEdit />
+                </button>
+                <button className="text-white bg-blue-900 p-2 rounded">
+                  <FaTrash />
+                </button>
+                </td>
+              </tr>
+            ))}
+        </tbody>
+      </table>
+
+      {/* Pagination */}
+      <div className="mt-4 flex justify-between">
+        <span>
+          Showing {((currentPage - 1) * itemsPerPage) + 1} to {Math.min(currentPage * itemsPerPage, filteredData.length)} of {filteredData.length} entries
+        </span>
+        <div>
+          <button onClick={handlePrevious} disabled={currentPage === 1} className="px-4 mx-2 py-2 bg-gray-300 rounded disabled:opacity-50">
+            Previous
+          </button>
+          <button onClick={handleNext} disabled={currentPage >= totalPages} className="px-4 py-2 bg-gray-300 rounded disabled:opacity-50">
+            Next
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+  interface Fasilitas {
+    id: number;
+    namaFasilitas: string;
+  }
+
+  const initialDataFasilitas: Fasilitas[] = [
+    { id: 1, namaFasilitas: "Pemrograman Web" },
+    { id: 2, namaFasilitas: "Basis Data" },
+    { id: 3, namaFasilitas: "Struktur Data" },
+  ];
+
+  const TableFasilitas: React.FC = () => {
+    const [data, setData] = useState<Fasilitas[]>(initialDataFasilitas);
+    const [currentPage, setCurrentPage] = useState(1);
+    const [itemsPerPage, setItemsPerPage] = useState(10);
+    const [filter, setFilter] = useState("");
+    const [showForm, setShowForm] = useState(false);
+    const [newNamaFasilitas, setNewNamaFasilitas] = useState("");
+
+    const handleForm = () => {
+      setShowForm(true);
+    };
+
+    const handleCloseForm = () => {
+      setShowForm(false);
+    };
+
+    const handleAddFasilitas = () => {
+      const newFasilitas: Fasilitas = {
+        id: data.length + 1, 
+        namaFasilitas: newNamaFasilitas,
+      };
+      setData([...data, newFasilitas]);
+      setShowForm(false); 
+      setNewNamaFasilitas("");
+    };
+    
+    const filteredData = data.filter((item) =>
+      item.namaFasilitas.toLowerCase().includes(filter.toLowerCase())
+    );
+      
+    const paginatedData = filteredData.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
+    const totalPages = Math.ceil(filteredData.length / itemsPerPage);
+    
+    const handleNext = () => {
+      if (currentPage < totalPages) {
+        setCurrentPage(currentPage + 1);
+      }
+    };
+    
+    const handlePrevious = () => {
+      if (currentPage > 1) {
+        setCurrentPage(currentPage - 1);
+      }
+    };
+
+    return (
+      <div className="p-4">
+      <div className="mb-4 flex justify-between items-center">
+        <h2 className="text-xl font-bold text-blue-600">Tabel Data Fasilitas</h2>
+        <button onClick={handleForm} className="flex items-center bg-blue-500 text-white px-4 py-2 rounded shadow hover:bg-blue-600">
+          <FaPlus className="mr-2" /> Tambah Data
+        </button>
+        {showForm && <TambahDataFasilitas open={showForm} setOpen={handleCloseForm} />}
+      </div>
+      <div className="mb-4 flex justify-between items-center">
+        <div>
+          <label className="mr-2">Show</label>
+          <select
+            value={itemsPerPage}
+            onChange={(e) => {
+              setItemsPerPage(Number(e.target.value));
+              setCurrentPage(1);
+            }}
+            className="p-2 border rounded"
+          >
+            <option value="10">10</option>
+            <option value="25">25</option>
+            <option value="50">50</option>
+          </select>
+          <label className="ml-2">entries</label>
+        </div>
+        <input
+          type="text"
+          placeholder="Search..."
+          value={filter}
+          onChange={(e) => setFilter(e.target.value)}
+          className="p-2 border border-gray-300 rounded"
+        />
+      </div>
+      <table className="min-w-full border-collapse">
+        <thead>
+          <tr>
+            {["No", "Nama Fasilitas"].map((header) => (
+              <th key={header} className="border px-4 py-2">{header}</th>
+            ))}
+            <th className="border p-2">Action</th>
+          </tr>
+        </thead>
+        <tbody>
+          {filteredData
+            .slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage)
+            .map((item, index) => (
+              <tr key={item.id} className="text-center">
+                <td className="border px-4 py-2 ">{index + 1 + (currentPage - 1) * itemsPerPage}</td>
+                <td className="border px-4 py-2">{item.namaFasilitas}</td>
+                <td className="border px-4 py-2">
+                  <button className="text-white bg-green-500 p-2 rounded mr-2">
+                  <FaEdit />
+                </button>
+                <button className="text-white bg-blue-900 p-2 rounded">
+                  <FaTrash />
+                </button>
+                </td>
+              </tr>
+            ))}
+        </tbody>
+      </table>
+
+      {/* Pagination */}
+      <div className="mt-4 flex justify-between">
+        <span>
+          Showing {((currentPage - 1) * itemsPerPage) + 1} to {Math.min(currentPage * itemsPerPage, filteredData.length)} of {filteredData.length} entries
+        </span>
+        <div>
+          <button onClick={handlePrevious} disabled={currentPage === 1} className="px-4 mx-2 py-2 bg-gray-300 rounded disabled:opacity-50">
+            Previous
+          </button>
+          <button onClick={handleNext} disabled={currentPage >= totalPages} className="px-4 py-2 bg-gray-300 rounded disabled:opacity-50">
+            Next
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+};   
+
+
+
+// const NavDash:  React.FC = () => {
+//   const [showConfirmation, setShowConfirmation] = useState(false);
+
+//   const handleConfirm = () => {
+//     setShowConfirmation(true);
+//   };
+
+  
+//   const handelClose = () => {
+//     setShowConfirmation(false);
+//   }
+//   return (
+//       <>
+//           <header className="bg-white shadow py-4 px-6">
+//           <div className="flex justify-between items-center">
+//             <button className="block lg:hidden">
+//               <i className="fa fa-bars"></i>
+//             </button>
+
+//             {/* <button onClick={logoutUser} className="text-blue-600">KELUAR</button> */}
+//             <button onClick={handleConfirm} className="text-blue-600 hover:font-bold transition-all block text-center cursor-pointer"
+//             style={{ minWidth: '100px' }}>KELUAR</button>
+//             { showConfirmation &&  <Confirmation open={showConfirmation} setOpen={handelClose}/>}                        
+//           </div>
+//         </header>
+//     </>
+//   );
+// }
 
 // 'use client'
 
@@ -745,7 +1071,7 @@ const TambahData: React.FC<Confirm> = ({ open, setOpen, semester, kelas }) => {
                     </button>
                     <div className="mt-3 w-full text-center sm:mt-0 sm:text-left">
                       <Dialog.Title as="h3" className="text-lg leading-6 font-medium text-gray-900">
-                        Menambah Jadwal Baru
+                        Menambah Data Dosen Baru
                       </Dialog.Title>
                       <form className="mt-5 space-y-4">
                         <div>
@@ -920,18 +1246,18 @@ const TambahDataDosen: React.FC<ConfirmDosen> = ({ open, setOpen }) => {
                     </button>
                     <div className="mt-3 w-full text-center sm:mt-0 sm:text-left">
                       <Dialog.Title as="h3" className="text-lg leading-6 font-medium text-gray-900">
-                        Menambah Jadwal Baru
+                        Menambah Data Dosen
                       </Dialog.Title>
                       <form className="mt-5 space-y-4">
                         <div>
                           <label htmlFor="nip-dosen" className="block text-sm font-medium text-gray-700">
-                            NIP Dosen
+                            NIP
                           </label>
                           <input
                             id="nip-dosen"
                             type="text"
                             className="mt-1 block w-full rounded-md py-4 px-2 border-gray-300 shadow-sm  focus:outline-indigo-500 sm:text-sm"
-                            placeholder="Masukkan NIP Dosen"
+                            placeholder="Masukkan NIP"
                           />
                         </div>
                         <div>
@@ -942,7 +1268,7 @@ const TambahDataDosen: React.FC<ConfirmDosen> = ({ open, setOpen }) => {
                             id="nama-dosen"
                             type="text"
                             className="mt-1 block w-full rounded-md py-4 px-2 border-gray-300 shadow-sm focus:outline-indigo-500 sm:text-sm"
-                            placeholder="Masukkan Nama Dosen"
+                            placeholder="Masukkan Nama"
                           />
                         </div>
                         <div className="mt-5 sm:mt-6 flex justify-end">
@@ -951,7 +1277,216 @@ const TambahDataDosen: React.FC<ConfirmDosen> = ({ open, setOpen }) => {
                             type="button"
                             className="inline-flex justify-center rounded-md border border-transparent bg-blue-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
                           >
-                            Simpan Jadwal
+                            Simpan
+                          </button>
+                        </div>
+                      </form>
+                    </div>
+                  </div>
+                </div>
+              </Dialog.Panel>
+            </Transition.Child>
+          </div>
+        </div>
+      </Dialog>
+    </Transition.Root>
+  );
+};
+
+interface ConfirmMakul {
+  open: boolean;
+  setOpen: (open: boolean) => void;
+}
+const TambahDataMakul: React.FC<ConfirmMakul> = ({ open, setOpen }) => {
+  const customStyles: StylesConfig<Option> = {
+    control: (provided) => ({
+      ...provided,
+      padding: '8px',
+      borderColor: 'gray',
+      boxShadow: 'none',
+      '&:hover': {
+        borderColor: 'blue',
+      },
+    }),
+  };
+  
+  const dosenOptions: Option[] = [
+    { value: 'DS1', label: 'Dr. Budi' },
+    { value: 'DS2', label: 'Dr. Ani' },
+    { value: 'DS3', label: 'Prof. Rina' },
+  ];
+  return (
+    <Transition.Root show={open} as={Fragment}>
+      <Dialog as="div" className="relative z-10" onClose={setOpen}>
+        <Transition.Child
+          as={Fragment}
+          enter="ease-out duration-300"
+          enterFrom="opacity-0"
+          enterTo="opacity-100"
+          leave="ease-in duration-200"
+          leaveFrom="opacity-100"
+          leaveTo="opacity-0"
+        >
+          <div className="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity" />
+        </Transition.Child>
+
+        <div className="fixed inset-0 z-10">
+          <div className="flex min-h-full items-center justify-center p-4 text-center sm:items-center sm:p-0">
+            <Transition.Child
+              as={Fragment}
+              enter="ease-out duration-300"
+              enterFrom="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
+              enterTo="opacity-100 translate-y-0 sm:scale-100"
+              leave="ease-in duration-200"
+              leaveFrom="opacity-100 translate-y-0 sm:scale-100"
+              leaveTo="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
+            >
+              <Dialog.Panel className="relative transform rounded-lg bg-white text-left shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-lg">
+                <div className="bg-white px-6 py-5 sm:p-6">
+                  <div className="sm:flex sm:items-start">
+                    <button
+                      type="button"
+                      className="absolute top-2 right-2 text-gray-400 hover:text-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 rounded-md"
+                      onClick={() => setOpen(false)}
+                    >
+                      <span className="sr-only">Close</span>
+                      <XMarkIcon className="h-6 w-6" aria-hidden="true" />
+                    </button>
+                    <div className="mt-3 w-full text-center sm:mt-0 sm:text-left">
+                      <Dialog.Title as="h3" className="text-lg leading-6 font-medium text-gray-900">
+                        Menambah Mata Kuliah 
+                      </Dialog.Title>
+                      <form className="mt-5 space-y-4">
+                        <div>
+                          <label htmlFor="nama-makul" className="block text-sm font-medium text-gray-700">
+                            Nama Mata Kuliah
+                          </label>
+                          <input
+                            id="nama-makul"
+                            type="text"
+                            className="mt-1 block w-full rounded-md py-4 px-2 border-gray-300 shadow-sm  focus:outline-indigo-500 sm:text-sm"
+                            placeholder="Masukkan Mata kuliah"
+                          />
+                        </div>
+                        <div>
+                          <label htmlFor="sks-makul" className="block text-sm font-medium text-gray-700">
+                            SKS
+                          </label>
+                          <input
+                            id="sks-makul"
+                            type="text"
+                            className="mt-1 block w-full rounded-md py-4 px-2 border-gray-300 shadow-sm focus:outline-indigo-500 sm:text-sm"
+                            placeholder="Masukkan SKS"
+                          />
+                        </div>
+                        <div>
+                          <label htmlFor="dosen" className="block text-sm font-medium text-gray-700">
+                            Dosen
+                          </label>
+                          <Select
+                            id="dosen"
+                            options={dosenOptions}
+                            className="mt-1"
+                            placeholder="Pilih Dosen"
+                            isSearchable
+                            styles={customStyles}
+                          />
+                        </div>
+                        <div className="mt-5 sm:mt-6 flex justify-end">
+                          <button
+                            onClick={() => setOpen(false)}
+                            type="button"
+                            className="inline-flex justify-center rounded-md border border-transparent bg-blue-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+                          >
+                            Simpan 
+                          </button>
+                        </div>
+                      </form>
+                    </div>
+                  </div>
+                </div>
+              </Dialog.Panel>
+            </Transition.Child>
+          </div>
+        </div>
+      </Dialog>
+    </Transition.Root>
+  );
+};
+
+const TambahDataFasilitas: React.FC<ConfirmMakul> = ({ open, setOpen }) => {
+  
+  return (
+    <Transition.Root show={open} as={Fragment}>
+      <Dialog as="div" className="relative z-10" onClose={setOpen}>
+        <Transition.Child
+          as={Fragment}
+          enter="ease-out duration-300"
+          enterFrom="opacity-0"
+          enterTo="opacity-100"
+          leave="ease-in duration-200"
+          leaveFrom="opacity-100"
+          leaveTo="opacity-0"
+        >
+          <div className="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity" />
+        </Transition.Child>
+
+        <div className="fixed inset-0 z-10">
+          <div className="flex min-h-full items-center justify-center p-4 text-center sm:items-center sm:p-0">
+            <Transition.Child
+              as={Fragment}
+              enter="ease-out duration-300"
+              enterFrom="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
+              enterTo="opacity-100 translate-y-0 sm:scale-100"
+              leave="ease-in duration-200"
+              leaveFrom="opacity-100 translate-y-0 sm:scale-100"
+              leaveTo="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
+            >
+              <Dialog.Panel className="relative transform rounded-lg bg-white text-left shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-lg">
+                <div className="bg-white px-6 py-5 sm:p-6">
+                  <div className="sm:flex sm:items-start">
+                    <button
+                      type="button"
+                      className="absolute top-2 right-2 text-gray-400 hover:text-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 rounded-md"
+                      onClick={() => setOpen(false)}
+                    >
+                      <span className="sr-only">Close</span>
+                      <XMarkIcon className="h-6 w-6" aria-hidden="true" />
+                    </button>
+                    <div className="mt-3 w-full text-center sm:mt-0 sm:text-left">
+                      <Dialog.Title as="h3" className="text-lg leading-6 font-medium text-gray-900">
+                        Menambah Mata Kuliah 
+                      </Dialog.Title>
+                      <form className="mt-5 space-y-4">
+                        <div>
+                          <label htmlFor="no-fasilitas" className="block text-sm font-medium text-gray-700">
+                           NO Fasilitas
+                          </label>
+                          <input
+                            id="no-fasilitas"
+                            type="number"
+                            className="mt-1 block w-full rounded-md py-4 px-2 border-gray-300 shadow-sm  focus:outline-indigo-500 sm:text-sm"
+                            placeholder=" no barang"
+                          />
+                        </div>
+                        <div>
+                          <label htmlFor="nama-fasilitas" className="block text-sm font-medium text-gray-700">
+                            Nama Fasilitas
+                          </label>
+                          <input
+                            id="nama-fasilitas"
+                            type="text"
+                            className="mt-1 block w-full rounded-md py-4 px-2 border-gray-300 shadow-sm focus:outline-indigo-500 sm:text-sm"
+                            placeholder="Masukkan Nama Barang"
+                          />
+                        </div>
+                        <div className="mt-5 sm:mt-6 flex justify-end">
+                          <button
+                            onClick={() => setOpen(false)}
+                            type="button"
+                            className="inline-flex justify-center rounded-md border border-transparent bg-blue-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+                          >
+                            Simpan 
                           </button>
                         </div>
                       </form>
