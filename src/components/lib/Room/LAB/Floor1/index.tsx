@@ -54,7 +54,7 @@ const Floor1: React.FC = () => {
                         <h1>Ruang Teknisi </h1>
                     </div>
                 </div>
-                <div className="ladder">
+                <div className="ladder w-max">
                     <a href="#floor-2" onClick={() => handleClick("#floor-2")}><img src={ladder} alt="tangga" className="ml-20" /></a>
                 </div>
             </div>
