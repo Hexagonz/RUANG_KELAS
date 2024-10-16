@@ -2,7 +2,8 @@ import { Link } from "react-router-dom";
 import logo from "./assets/image/logo.png";
 import "./style/style.css"
 import { Confirmation } from "../index";
-import { useState, useEffect } from "react";
+import { useState } from "react";
+
 
 const handleClick = (id: string): void => {
     const elementID: HTMLElement | null = document.getElementById(id);
@@ -23,18 +24,6 @@ const Navbar: React.FC<ListShow> = ({ onShow }) => {
     const [isVisible, setIsVisible] = useState(false); // State untuk back to top button
     const token = localStorage.getItem("access_token");
 
-    // Scroll event untuk memunculkan back to top button
-    useEffect(() => {
-        const toggleVisibility = () => {
-            if (window.scrollY > 300) {
-                setIsVisible(true);
-            } else {
-                setIsVisible(false);
-            }
-        };
-        window.addEventListener('scroll', toggleVisibility);
-        return () => window.removeEventListener('scroll', toggleVisibility);
-    }, []);
 
     const handleConfirm = () => {
         setShowConfirmation(true);
@@ -56,8 +45,8 @@ const Navbar: React.FC<ListShow> = ({ onShow }) => {
                     </div>
                     <div className="list" hidden={onShow}>
                         <ul className="flex justify-between items-center gap-28 *:font-semibold">
-                            <li><a className="hover:text-[#FF8F00]" href="#teori" onClick={() => handleClick("teori")}>Gedung Teori</a></li>
-                            <li><a className="hover:text-[#FF8F00]" href="#floor-1" onClick={() => handleClick("floor-1")}>Gedung Lab</a></li>
+                            <li><Link className="hover:text-[#FF8F00]" to="#teori" onClick={() => handleClick("teori")}>Gedung Teori</Link></li>
+                            <li><Link className="hover:text-[#FF8F00]" to="#floor-1" onClick={() => handleClick("floor-1")}>Gedung Lab</Link></li>
                             <li><Link className="hover:text-[#FF8F00]" to="/dashboard">Dashboard</Link></li>
                         </ul>
                     </div>

@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useRef} from 'react';
+import React, { useEffect, useState } from 'react';
 import { Link  } from "react-router-dom"
 import { Confirmation } from '../../lib';
 import { FaCalendar, FaUsers, FaTachometerAlt, FaChevronDown, FaChalkboardTeacher  } from 'react-icons/fa';
@@ -107,10 +107,15 @@ const Dashboard: React.FC = () => {
               onSelectClass={handleSelectClass}
               activeButton={activeButton} // Pass activeButton ke JadwalSemester
             />
-            <a href="/akun" className="flex items-center px-4 py-2">
+            <button
+              onClick={() => handleSelectView("User")}
+              className={`flex items-center px-4 py-2 text-white hover:bg-blue-900 w-full ${
+                activeButton === "User" ? "bg-blue-900" : ""
+              }`}
+            >
               <FaUsers className="mr-2" />
               <span>Akun</span>
-            </a>
+            </button>
           </nav>
         </div>
       </aside>
@@ -146,8 +151,9 @@ const Dashboard: React.FC = () => {
           )}
           {selectedView === "Dosen" &&  <> <TableDosen /></>}
           {selectedView === "Mata Kuliah" && <><TableMakul/></>}
-          {selectedView === "Kelas" && <div>Konten Kelas</div>}
+          {selectedView === "Kelas" && <><TableRuangKelas /></>}
           {selectedView === "Fasilitas" && <><TableFasilitas/></>}
+          {selectedView === "User" && <><div>Cihuyyy</div></>}
           {selectedView === "JadwalSemester" && selectedClass && (
             <TableJadwal smstr={selectedSms} kelas={selectedClass} />
           )}
@@ -165,7 +171,7 @@ interface Jadwal  {
 }
 
 const JadwalSemester: React.FC<Jadwal> = ({ jadwal, smstr, onSelectClass, activeButton }) => {
-  const [isOpen, setIsOpen] = useState<number | null>(null);
+  const [isOpen, setIsOpen] = useState <number | null>(null);
 
   const toggleDropdown = (sms: number) => {
     setIsOpen(sms);
@@ -203,7 +209,7 @@ const JadwalSemester: React.FC<Jadwal> = ({ jadwal, smstr, onSelectClass, active
           }`}
         >
           {
-          ["A","B","D","E"].map((value) => ( 
+          ["A","B","C","D","E"].map((value) => ( 
             <>
               <button
                 className={`block hover:bg-blue-900 rounded-lg py-2 px-1 w-full text-left ${
@@ -258,6 +264,7 @@ const initialData: Data[] = [
   { id: 10, no: 10, hari: "Jumat", waktuMulai: "10:15", waktuAkhir: "12:15", mataKuliah: "Pengujian Perangkat Lunak", dosen: "Dosen J", ruang: "TI-2", semester: 2, kelas: "A" },
   { id: 11, no: 11, hari: "Jumat", waktuMulai: "10:15", waktuAkhir: "12:15", mataKuliah: "Pengujian Perangkat Lunak", dosen: "Dosen J", ruang: "TI-2", semester: 2, kelas: "A" },
 ];
+
 interface Ruang {
   smstr: number | null;
   kelas: string | null;
@@ -478,28 +485,13 @@ const TableDosen: React.FC = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(10);
   const [filter, setFilter] = useState("");
-  const [showForm, setShowForm] = useState(false);
-  const [newNip, setNewNip] = useState("");
-  const [newNamaDosen, setNewNamaDosen] = useState("");
+  const [showForm, setShowForm] = useState(false);     
 
   const handleForm = () => {
     setShowForm(true);
   };
 
   const handleCloseForm = () => {
-    setShowForm(false);
-  };
-
-  const handleAddDosen = () => {
-    const newDosen: Dosen = {
-      id: data.length + 1,
-      no: data.length + 1,
-      nip: newNip,
-      namaDosen: newNamaDosen,
-    };
-    setData([...data, newDosen]);
-    setNewNip("");
-    setNewNamaDosen("");
     setShowForm(false);
   };
 
@@ -597,6 +589,134 @@ const TableDosen: React.FC = () => {
   );
 };
 
+interface RuangKelas {
+  id: number;
+  no: number;
+  namaKelas: string;
+  lokasi: string;
+  status: string;
+  fasilitas: string;
+}
+
+const initialDataRuangKelas: RuangKelas[] = [
+  { id: 1, no: 1, namaKelas: "A", lokasi: "Lab", status: "Tersedia", fasilitas: "Proyektor, AC" },
+  { id: 2, no: 2, namaKelas: "B", lokasi: "Teori", status: "Tidak Tersedia", fasilitas: "Whiteboard" },
+  { id: 3, no: 3, namaKelas: "C", lokasi: "Lab", status: "Tersedia", fasilitas: "Komputer, Proyektor" },
+];
+
+const TableRuangKelas: React.FC = () => {
+  const [data, setData] = useState<RuangKelas[]>(initialDataRuangKelas);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage, setItemsPerPage] = useState(10);
+  const [filter, setFilter] = useState("");
+  const [showForm, setShowForm] = useState(false);
+
+  const handleForm = () => {
+    setShowForm(true);
+  };
+
+  const handleCloseForm = () => {
+    setShowForm(false);
+  };
+
+  const filteredData = data.filter((item) =>
+    item.namaKelas.toLowerCase().includes(filter.toLowerCase()) ||
+    item.lokasi.toLowerCase().includes(filter.toLowerCase()) ||
+    item.status.toLowerCase().includes(filter.toLowerCase()) ||
+    item.fasilitas.toLowerCase().includes(filter.toLowerCase())
+  );
+
+  const paginatedData = filteredData.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
+  const totalPages = Math.ceil(filteredData.length / itemsPerPage);
+
+  const handleNext = () => {
+    if (currentPage < totalPages) {
+      setCurrentPage(currentPage + 1);
+    }
+  };
+
+  const handlePrevious = () => {
+    if (currentPage > 1) {
+      setCurrentPage(currentPage - 1);
+    }
+  };
+
+  return (
+    <div className="p-4">
+      <div className="mb-4 flex justify-between items-center">
+        <h2 className="text-xl font-bold text-blue-600">Tabel Data Ruang Kelas</h2>
+        <button onClick={handleForm} className="flex items-center bg-blue-500 text-white px-4 py-2 rounded shadow hover:bg-blue-600">
+          <FaPlus className="mr-2" /> Tambah Data
+        </button>
+        {showForm && <TambahDataRuangKelas open={showForm} setOpen={handleCloseForm} />}
+      </div>
+      <div className="mb-4 flex justify-between items-center">
+        <div>
+          <label className="mr-2">Show</label>
+          <select value={itemsPerPage} onChange={(e) => {
+            setItemsPerPage(Number(e.target.value));
+            setCurrentPage(1);
+          }} className="p-2 border rounded">
+            <option value="10">10</option>
+            <option value="25">25</option>
+            <option value="50">50</option>
+          </select>
+          <label className="ml-2">entries</label>
+        </div>
+        <input
+          type="text"
+          placeholder="Search..."
+          value={filter}
+          onChange={(e) => setFilter(e.target.value)}
+          className="p-2 border border-gray-300 rounded"
+        />
+      </div>
+      <table className="min-w-full border-collapse">
+        <thead>
+          <tr>
+            {["No", "Nama Kelas", "Lokasi", "Status", "Fasilitas"].map((header) => (
+              <th key={header} className="border px-4 py-2">{header}</th>
+            ))}
+            <th className="border p-2">Action</th>
+          </tr>
+        </thead>
+        <tbody>
+          {paginatedData.map((item) => (
+            <tr key={item.id} className="text-center">
+              <td className="border p-2">{item.no}</td>
+              <td className="border p-2">{item.namaKelas}</td>
+              <td className="border p-2">{item.lokasi}</td>
+              <td className="border p-2">{item.status}</td>
+              <td className="border p-2">{item.fasilitas}</td>
+              <td className="border p-2">
+                <button className="text-white bg-green-500 p-2 rounded mr-2">
+                  <FaEdit />
+                </button>
+                <button className="text-white bg-blue-900 p-2 rounded">
+                  <FaTrash />
+                </button>
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+      <div className="mt-4 flex justify-between">
+        <span>
+          Showing {((currentPage - 1) * itemsPerPage) + 1} to {Math.min(currentPage * itemsPerPage, filteredData.length)} of {filteredData.length} entries
+        </span>
+        <div>
+          <button onClick={handlePrevious} disabled={currentPage === 1} className="px-4 mx-2 py-2 bg-gray-300 rounded disabled:opacity-50">
+            Previous
+          </button>
+          <button onClick={handleNext} disabled={currentPage >= totalPages} className="px-4 py-2 bg-gray-300 rounded disabled:opacity-50">
+            Next
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+};
+
 
 const NavDash: React.FC = () => {
   const [showConfirmation, setShowConfirmation] = useState(false);
@@ -656,9 +776,7 @@ const TableMakul: React.FC = () => {
   const [itemsPerPage, setItemsPerPage] = useState(10);
   const [filter, setFilter] = useState("");
   const [showForm, setShowForm] = useState(false);
-  const [newNamaMakul, setNewNamaMakul] = useState("");
-  const [newSks, setNewSks] = useState<number>(0);
-  const [newNamaDosen, setNewNamaDosen] = useState("");
+
 
   const handleForm = () => {
     setShowForm(true);
@@ -668,26 +786,13 @@ const TableMakul: React.FC = () => {
     setShowForm(false);
   };
 
-  const handleAddMakul = () => {
-    const newMakul: Makul = {
-      id: data.length + 1, 
-      namaMakul: newNamaMakul,
-      sks: newSks,
-      namaDosen: newNamaDosen,
-    };
-    setData([...data, newMakul]);
-    setShowForm(false); 
-    setNewNamaMakul("");
-    setNewSks(0);
-    setNewNamaDosen("");
-  };
 
   const filteredData = data.filter((item) =>
     item.namaMakul.toLowerCase().includes(filter.toLowerCase()) ||
     item.namaDosen.toLowerCase().includes(filter.toLowerCase())
   );
   
-  const paginatedData = filteredData.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
+  // const paginatedData = filteredData.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
   const totalPages = Math.ceil(filteredData.length / itemsPerPage);
 
   const handleNext = () => {
@@ -802,7 +907,7 @@ const TableMakul: React.FC = () => {
     const [itemsPerPage, setItemsPerPage] = useState(10);
     const [filter, setFilter] = useState("");
     const [showForm, setShowForm] = useState(false);
-    const [newNamaFasilitas, setNewNamaFasilitas] = useState("");
+    // const [newNamaFasilitas, setNewNamaFasilitas] = useState("");
 
     const handleForm = () => {
       setShowForm(true);
@@ -812,21 +917,11 @@ const TableMakul: React.FC = () => {
       setShowForm(false);
     };
 
-    const handleAddFasilitas = () => {
-      const newFasilitas: Fasilitas = {
-        id: data.length + 1, 
-        namaFasilitas: newNamaFasilitas,
-      };
-      setData([...data, newFasilitas]);
-      setShowForm(false); 
-      setNewNamaFasilitas("");
-    };
-    
     const filteredData = data.filter((item) =>
       item.namaFasilitas.toLowerCase().includes(filter.toLowerCase())
     );
       
-    const paginatedData = filteredData.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
+    // const paginatedData = filteredData.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
     const totalPages = Math.ceil(filteredData.length / itemsPerPage);
     
     const handleNext = () => {
@@ -1297,6 +1392,7 @@ interface ConfirmMakul {
   open: boolean;
   setOpen: (open: boolean) => void;
 }
+
 const TambahDataMakul: React.FC<ConfirmMakul> = ({ open, setOpen }) => {
   const customStyles: StylesConfig<Option> = {
     control: (provided) => ({
@@ -1414,6 +1510,7 @@ const TambahDataMakul: React.FC<ConfirmMakul> = ({ open, setOpen }) => {
   );
 };
 
+
 const TambahDataFasilitas: React.FC<ConfirmMakul> = ({ open, setOpen }) => {
   
   return (
@@ -1501,6 +1598,154 @@ const TambahDataFasilitas: React.FC<ConfirmMakul> = ({ open, setOpen }) => {
     </Transition.Root>
   );
 };
+
+const TambahDataRuangKelas: React.FC<ConfirmMakul> = ({ open, setOpen }) => {
+  const kelasOptions = [
+    { value: 'A', label: 'A' },
+    { value: 'B', label: 'B' },
+    { value: 'C', label: 'C' },
+    { value: 'D', label: 'D' },
+    { value: 'E', label: 'E' },
+  ];
+
+  const lokasiOptions = [
+    { value: 'Lab', label: 'Lab' },
+    { value: 'Teori', label: 'Teori' },
+  ];
+
+  const statusOptions = [
+    { value: 'Tersedia', label: 'Tersedia' },
+    { value: 'Tidak Tersedia', label: 'Tidak Tersedia' },
+  ];
+
+  const fasilitasOptions = [
+    { value: 'Proyektor', label: 'Proyektor' },
+    { value: 'AC', label: 'AC' },
+    { value: 'Kursi Ergonomis', label: 'Kursi Ergonomis' },
+    { value: 'Papan Tulis', label: 'Papan Tulis' },
+    { value: 'Speaker', label: 'Speaker' },
+  ];
+
+  const customStyles: StylesConfig = {
+    control: (provided) => ({
+      ...provided,
+      padding: '4px',
+    }),
+    menu: (provided) => ({
+      ...provided,
+      zIndex: 9999,
+    }),
+  };
+
+  return (
+    <Transition.Root show={open} as={Fragment}>
+      <Dialog as="div" className="relative z-10" onClose={setOpen}>
+        <Transition.Child
+          as={Fragment}
+          enter="ease-out duration-300"
+          enterFrom="opacity-0"
+          enterTo="opacity-100"
+          leave="ease-in duration-200"
+          leaveFrom="opacity-100"
+          leaveTo="opacity-0"
+        >
+          <div className="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity" />
+        </Transition.Child>
+
+        <div className="fixed inset-0 z-10">
+          <div className="flex min-h-full items-center justify-center p-4 text-center sm:items-center sm:p-0">
+            <Transition.Child
+              as={Fragment}
+              enter="ease-out duration-300"
+              enterFrom="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
+              enterTo="opacity-100 translate-y-0 sm:scale-100"
+              leave="ease-in duration-200"
+              leaveFrom="opacity-100 translate-y-0 sm:scale-100"
+              leaveTo="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
+            >
+              <Dialog.Panel className="relative transform rounded-lg bg-white text-left shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-lg">
+                <div className="bg-white px-6 py-5 sm:p-6">
+                  <div className="sm:flex sm:items-start">
+                    <button
+                      type="button"
+                      className="absolute top-2 right-2 text-gray-400 hover:text-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 rounded-md"
+                      onClick={() => setOpen(false)}
+                    >
+                      <span className="sr-only">Close</span>
+                      <XMarkIcon className="h-6 w-6" aria-hidden="true" />
+                    </button>
+                    <div className="mt-3 w-full text-center sm:mt-0 sm:text-left">
+                      <Dialog.Title as="h3" className="text-lg leading-6 font-medium text-gray-900">
+                        Menambah Ruang Kelas
+                      </Dialog.Title>
+                      <form className="mt-5 space-y-4">
+                        <div>
+                          <label htmlFor="nama-kelas" className="block text-sm font-medium text-gray-700">
+                            Nama Kelas
+                          </label>
+                          <Select
+                            id="nama-kelas"
+                            options={kelasOptions}
+                            styles={customStyles}
+                            placeholder="Pilih Nama Kelas"
+                          />
+                        </div>
+                        <div>
+                          <label htmlFor="lokasi" className="block text-sm font-medium text-gray-700">
+                            Lokasi
+                          </label>
+                          <Select
+                            id="lokasi"
+                            options={lokasiOptions}
+                            styles={customStyles}
+                            placeholder="Pilih Lokasi"
+                          />
+                        </div>
+                        <div>
+                          <label htmlFor="status" className="block text-sm font-medium text-gray-700">
+                            Status
+                          </label>
+                          <Select
+                            id="status"
+                            options={statusOptions}
+                            styles={customStyles}
+                            placeholder="Pilih Status"
+                          />
+                        </div>
+                        <div>
+                          <label htmlFor="fasilitas" className="block text-sm font-medium text-gray-700">
+                            Fasilitas
+                          </label>
+                          <Select
+                            id="fasilitas"
+                            options={fasilitasOptions}
+                            isMulti
+                            styles={customStyles}
+                            placeholder="Pilih Fasilitas"
+                          />
+                        </div>
+                        <div className="mt-5 sm:mt-6 flex justify-end">
+                          <button
+                            onClick={() => setOpen(false)}
+                            type="button"
+                            className="inline-flex justify-center rounded-md border border-transparent bg-blue-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+                          >
+                            Simpan
+                          </button>
+                        </div>
+                      </form>
+                    </div>
+                  </div>
+                </div>
+              </Dialog.Panel>
+            </Transition.Child>
+          </div>
+        </div>
+      </Dialog>
+    </Transition.Root>
+  );
+};
+
 
 const Card: React.FC<{ title: string; count: number; icon: JSX.Element }> = ({ title, count, icon }) => {
   return (

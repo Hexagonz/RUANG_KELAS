@@ -1,7 +1,7 @@
 import ladder from "../../assets/ladder_down.svg";
 import { KelasCard } from "../../../../lib";
 import { useState } from "react";
-
+import { Link } from "react-router-dom";
 
 const Floor1: React.FC = () => {
     const [hoveredClass, setHoveredClass] = useState<string | null>(null);
@@ -18,7 +18,7 @@ const Floor1: React.FC = () => {
         const elementID: HTMLElement | null = document.getElementById(id);
         elementID?.scrollIntoView({
           behavior: "smooth",
-          block: "start" as ScrollLogicalPosition, // or block: 0
+          block: "end" 
         });
       };
     
@@ -55,7 +55,7 @@ const Floor1: React.FC = () => {
                     </div>
                 </div>
                 <div className="ladder w-max">
-                    <a href="#floor-2" onClick={() => handleClick("#floor-2")}><img src={ladder} alt="tangga" className="ml-20" /></a>
+                    <Link to="#floor-2" onClick={() => handleClick("floor-2")}><img src={ladder} alt="tangga" className="ml-20" /></Link>
                 </div>
             </div>
         </>

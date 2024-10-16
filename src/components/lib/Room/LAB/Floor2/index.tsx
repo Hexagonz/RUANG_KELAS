@@ -1,6 +1,7 @@
 import ladder from "../../assets/ladder_up.svg";
 import { KelasCard } from "../../../../lib";
 import { useState } from "react";
+import { Link } from "react-router-dom";
 
 
 const Floor2: React.FC = () => {
@@ -24,7 +25,7 @@ const Floor2: React.FC = () => {
     return (
         <>
             <div className="content *:text-center pt-28 py-12 text-[#333333]">
-                <h4 className="scroll-smooth font-bold text-3xl" id="floor-2">Denah Gedung LAB Lantai 2</h4>
+                <h4 className="scroll-smooth font-bold text-3xl" >Denah Gedung LAB Lantai 2</h4>
                 <p className="text-xl">Menyediakan Ruangan</p>
             </div> 
             <div className="location w-[55%] mx-auto bg-[#DDF2FD] h-max py-8 rounded-[10px] shadow-[4.0px_8.0px_8.0px_rgba(0,0,0,0.38)] relative">
@@ -59,7 +60,7 @@ const Floor2: React.FC = () => {
                 </div>
                 <div className="bottom flex justify-between px-16 text-white mt-12">
                     <div className="ladder">
-                        <a href="#floor-1" onClick={() => handleClick("floor-1")}><img src={ladder} alt="tangga"  /></a>
+                        <Link to="#floor-1" onClick={() => handleClick("floor-1")}><img src={ladder} alt="tangga"  /></Link>
                     </div>
                     <div className="toilet bg-[#FF8D0C] w-52 h-48 flex justify-center items-center text-2xl font-bold rounded-xl border-4 border-white text-center">
                         <h1>Ruang Teknisi </h1>

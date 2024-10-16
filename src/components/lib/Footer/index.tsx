@@ -11,12 +11,12 @@ const Footer:  React.FC = () => {
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
                 {/* Kolom Gedung Teori */}
                     <div>
-                        <h3 className="font-bold text-3xl mb-4 text-white">GEDUNG TEORI</h3>
+                        <h3 className="font-bold text-3xl mb-4 text-white" >GEDUNG TEORI</h3>
                         <div className="flex items-center mb-2">
                             <IoIosCall className="w-6"/>
                             <span>+6281256074059</span>
                         </div>
-                        <div className="flex items-center mb-2">       
+                        <div className="flex items-center mb-2" id="floor-2">       
                             <CgMail className="w-6"/> 
                             <a href="mailto:kampus@polnep.ac.id" className="underline">
                                 kampus@polnep.ac.id
