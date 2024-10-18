@@ -1,4 +1,4 @@
-import React from "react";
+import { useState, useRef } from "react";
 import { Footer, Navbar } from "../../lib";
 
 const FormDetails: React.FC = () => {
@@ -14,16 +14,93 @@ const FormDetails: React.FC = () => {
     );
 }
 
-const RoomDetails: React.FC  = () => {
+const RoomDetails: React.FC = () => {
+    const [selectedImage, setSelectedImage] = useState('https://placehold.co/100x100');
+    const [zoomPosition, setZoomPosition] = useState({ x: 0, y: 0 });
+    const [isLensActive, setIsLensActive] = useState(false);
+    const imageRef = useRef<HTMLImageElement | null>(null);
+
+    const handleImageClick = (imageUrl: string) => {
+        setSelectedImage(imageUrl);
+    };
+
+    const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
+        if (!imageRef.current) return;
+
+        const { left, top, width, height } = imageRef.current.getBoundingClientRect();
+        const x = ((e.clientX - left) / width) * 100;
+        const y = ((e.clientY - top) / height) * 100;
+        setZoomPosition({ x, y });
+    };
+
+    const handleMouseEnter = () => {
+        setIsLensActive(true);
+    };
+
+    const handleMouseLeave = () => {
+        setIsLensActive(false);
+    };
+
     return (
         <div className="bg-white rounded-lg shadow-lg p-6 w-1/3 py-10 border-2">
             <h1 className="text-2xl font-bold mb-2">TI 1</h1>
             <p className="text-gray-600 mb-4">Gedung Teori</p>
-            <img src="https://placehold.co/600x400" alt="Classroom with a whiteboard and desks" className="w-full h-64 object-cover mb-4 rounded-lg" />
+            <div
+                className="relative"
+                onMouseMove={handleMouseMove}
+                onMouseEnter={handleMouseEnter}
+                onMouseLeave={handleMouseLeave}
+            >
+                <img
+                    ref={imageRef}
+                    src={selectedImage}
+                    alt="Classroom with a whiteboard and desks"
+                    className="w-full h-64 object-cover mb-4 rounded-lg"
+                />
+                {isLensActive && (
+                    <div
+                        className="absolute rounded-full border-2 border-blue-500"
+                        style={{
+                            width: '150px',
+                            height: '150px',
+                            top: `${zoomPosition.y}%`,
+                            left: `${zoomPosition.x}%`,
+                            transform: 'translate(-50%, -50%)',
+                            backgroundImage: `url(${selectedImage})`,
+                            backgroundSize: '200%', // Pembesaran 2x (zoom in)
+                            backgroundPosition: `${zoomPosition.x}% ${zoomPosition.y}%`,
+                            backgroundRepeat: 'no-repeat',
+                            pointerEvents: 'none',
+                            boxShadow: '0 0 8px rgba(0, 0, 0, 0.3)',
+                        }}
+                    />
+                )}
+            </div>
             <div className="flex justify-center space-x-2 mb-4">
-                <img src="https://placehold.co/100x100" alt="Classroom view 1" className="w-24 h-24 object-cover rounded-lg border-2 border-blue-500" />
-                <img src="https://placehold.co/100x100" alt="Classroom view 2" className="w-24 h-24 object-cover rounded-lg" />
-                <img src="https://placehold.co/100x100" alt="Classroom view 3" className="w-24 h-24 object-cover rounded-lg" />
+                <img
+                    src="https://placehold.co/100x100"
+                    alt="Classroom view 1"
+                    className={`w-24 h-24 object-cover rounded-lg border-2 ${
+                        selectedImage === 'https://placehold.co/100x100' ? 'border-blue-500' : ''
+                    }`}
+                    onClick={() => handleImageClick('https://placehold.co/100x100')}
+                />
+                <img
+                    src="https://placehold.co/200x100"
+                    alt="Classroom view 2"
+                    className={`w-24 h-24 object-cover rounded-lg border-2 ${
+                        selectedImage === 'https://placehold.co/200x100' ? 'border-blue-500' : ''
+                    }`}
+                    onClick={() => handleImageClick('https://placehold.co/200x100')}
+                />
+                <img
+                    src="https://placehold.co/300x100"
+                    alt="Classroom view 3"
+                    className={`w-24 h-24 object-cover rounded-lg border-2 ${
+                        selectedImage === 'https://placehold.co/300x100' ? 'border-blue-500' : ''
+                    }`}
+                    onClick={() => handleImageClick('https://placehold.co/300x100')}
+                />
             </div>
             <div className="grid grid-cols-3 gap-4 mb-4">
                 <div>

@@ -47,9 +47,9 @@ const Dashboard: React.FC = () => {
   }, [selectedClass, semester, selectedView]);
 
   return (
-    <div className="min-h-screen bg-gray-100 flex">
+    <div className="min-h-screen bg-gray-100 flex ">
       {/* Sidebar */}
-      <aside className="w-72 bg-[#364F97] text-white">
+      <aside className="w-max bg-[#364F97] text-white ">
         <div className="py-4">
           <div className="text-center text-2xl font-bold mb-6">
             <Link to="/">STUDILAB</Link>
@@ -189,7 +189,7 @@ const JadwalSemester: React.FC<Jadwal> = ({ jadwal, smstr, onSelectClass, active
     list.push(
       <div className="w-full " key={i} >
         <button
-          className={`flex items-center w-full px-4 py-2 text-left text-white hover:bg-blue-900 ${
+          className={`flex items-center w-max px-4 py-2 text-left text-white hover:bg-blue-900  ${
             activeButton === `JadwalSemester-${sms}` ? "bg-blue-900" : ""
           }`}
           onClick={() => toggleDropdown(i)}
@@ -197,14 +197,14 @@ const JadwalSemester: React.FC<Jadwal> = ({ jadwal, smstr, onSelectClass, active
           <FaCalendar className="mr-2 " />
           <span>Jadwal Semester {sms}</span>
           <FaChevronDown
-            className={`ml-auto transform transition-transform duration-300 ${
+            className={`ml-4 transform transition-transform duration-300 ${
               isOpen == i ? 'rotate-120' : '-rotate-90'
             }`}
           />
         </button>
         {/* Dropdown with animation */}
         <div
-          className={`ml-6 mr-4 mt-2 space-y-2 overflow-hidden transition-all duration-300 ease-in-out ${
+          className={`ml-6 mr-4 mt-2 space-y-2 overflow-hidden transition-all duration-300 ease-in-out  w-full ${
             isOpen == i ? 'max-h-96' : 'max-h-0'
           }`}
         >
@@ -212,7 +212,7 @@ const JadwalSemester: React.FC<Jadwal> = ({ jadwal, smstr, onSelectClass, active
           ["A","B","C","D","E"].map((value) => ( 
             <>
               <button
-                className={`block hover:bg-blue-900 rounded-lg py-2 px-1 w-full text-left ${
+                className={`block hover:bg-blue-900 rounded-lg py-2 px-1 w-[80%] text-left ${
                   activeButton === `JadwalSemester-${sms}-${value}` ? "bg-blue-900" : ""
                 }`}
                 onClick={() => onSelectClass(`${value}`,sms)}
@@ -620,7 +620,7 @@ const TableRuangKelas: React.FC = () => {
   };
 
   const filteredData = data.filter((item) =>
-    item.namaKelas.toLowerCase().includes(filter.toLowerCase()) ||
+    item.namaKelas.toLowerCase().includes(filter.toLowerCase().trim()) ||
     item.lokasi.toLowerCase().includes(filter.toLowerCase()) ||
     item.status.toLowerCase().includes(filter.toLowerCase()) ||
     item.fasilitas.toLowerCase().includes(filter.toLowerCase())
@@ -789,6 +789,7 @@ const TableMakul: React.FC = () => {
 
   const filteredData = data.filter((item) =>
     item.namaMakul.toLowerCase().includes(filter.toLowerCase()) ||
+    item.sks.toString().toLowerCase().includes(filter.toLowerCase()) ||
     item.namaDosen.toLowerCase().includes(filter.toLowerCase())
   );
   
