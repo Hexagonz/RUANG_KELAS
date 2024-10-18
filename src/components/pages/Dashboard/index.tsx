@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Link  } from "react-router-dom"
 import { Confirmation } from '../../lib';
-import { FaCalendar, FaUsers, FaTachometerAlt, FaChevronDown, FaChalkboardTeacher  } from 'react-icons/fa';
+import { FaCalendar, FaUsers, FaTachometerAlt, FaChevronDown, FaChalkboardTeacher } from 'react-icons/fa';
 import { SiGoogleclassroom } from "react-icons/si";
 import { IoBookSharp } from "react-icons/io5";
 import { TbAirConditioning } from "react-icons/tb";
@@ -891,57 +891,65 @@ const TableMakul: React.FC = () => {
   );
 };
 
-  interface Fasilitas {
-    id: number;
-    namaFasilitas: string;
-  }
+import { FaTable, FaChair, FaChalkboard } from "react-icons/fa"; // Import ikon
+import { BsFillProjectorFill } from "react-icons/bs";
+import { MdOutlineTableRestaurant } from "react-icons/md";
 
-  const initialDataFasilitas: Fasilitas[] = [
-    { id: 1, namaFasilitas: "Pemrograman Web" },
-    { id: 2, namaFasilitas: "Basis Data" },
-    { id: 3, namaFasilitas: "Struktur Data" },
-  ];
+interface Fasilitas {
+  id: number;
+  namaFasilitas: string;
+  icon: JSX.Element; // Tambah properti icon
+}
 
-  const TableFasilitas: React.FC = () => {
-    const [data, setData] = useState<Fasilitas[]>(initialDataFasilitas);
-    const [currentPage, setCurrentPage] = useState(1);
-    const [itemsPerPage, setItemsPerPage] = useState(10);
-    const [filter, setFilter] = useState("");
-    const [showForm, setShowForm] = useState(false);
-    // const [newNamaFasilitas, setNewNamaFasilitas] = useState("");
+const initialDataFasilitas: Fasilitas[] = [
+  { id: 1, namaFasilitas: "Meja", icon: <MdOutlineTableRestaurant /> },
+  { id: 2, namaFasilitas: "Kursi", icon: <FaChair /> },
+  { id: 3, namaFasilitas: "AC", icon: <TbAirConditioning/> },
+  { id: 4, namaFasilitas: "Papan Tulis", icon: <FaChalkboard /> },
+  { id: 5, namaFasilitas: "Proyektor", icon: <BsFillProjectorFill/> },
+];
 
-    const handleForm = () => {
-      setShowForm(true);
-    };
+const TableFasilitas: React.FC = () => {
+  const [data, setData] = useState<Fasilitas[]>(initialDataFasilitas);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage, setItemsPerPage] = useState(10);
+  const [filter, setFilter] = useState("");
+  const [showForm, setShowForm] = useState(false);
 
-    const handleCloseForm = () => {
-      setShowForm(false);
-    };
+  const handleForm = () => {
+    setShowForm(true);
+  };
 
-    const filteredData = data.filter((item) =>
-      item.namaFasilitas.toLowerCase().includes(filter.toLowerCase())
-    );
-      
-    // const paginatedData = filteredData.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
-    const totalPages = Math.ceil(filteredData.length / itemsPerPage);
-    
-    const handleNext = () => {
-      if (currentPage < totalPages) {
-        setCurrentPage(currentPage + 1);
-      }
-    };
-    
-    const handlePrevious = () => {
-      if (currentPage > 1) {
-        setCurrentPage(currentPage - 1);
-      }
-    };
+  const handleCloseForm = () => {
+    setShowForm(false);
+  };
 
-    return (
-      <div className="p-4">
+  const filteredData = data.filter((item) =>
+    item.namaFasilitas.toLowerCase().includes(filter.toLowerCase())
+  );
+
+  const totalPages = Math.ceil(filteredData.length / itemsPerPage);
+
+  const handleNext = () => {
+    if (currentPage < totalPages) {
+      setCurrentPage(currentPage + 1);
+    }
+  };
+
+  const handlePrevious = () => {
+    if (currentPage > 1) {
+      setCurrentPage(currentPage - 1);
+    }
+  };
+
+  return (
+    <div className="p-4">
       <div className="mb-4 flex justify-between items-center">
         <h2 className="text-xl font-bold text-blue-600">Tabel Data Fasilitas</h2>
-        <button onClick={handleForm} className="flex items-center bg-blue-500 text-white px-4 py-2 rounded shadow hover:bg-blue-600">
+        <button
+          onClick={handleForm}
+          className="flex items-center bg-blue-500 text-white px-4 py-2 rounded shadow hover:bg-blue-600"
+        >
           <FaPlus className="mr-2" /> Tambah Data
         </button>
         {showForm && <TambahDataFasilitas open={showForm} setOpen={handleCloseForm} />}
@@ -971,32 +979,38 @@ const TableMakul: React.FC = () => {
           className="p-2 border border-gray-300 rounded"
         />
       </div>
-      <table className="min-w-full border-collapse">
+      <table className="min-w-full border-collapse ">
         <thead>
           <tr>
-            {["No", "Nama Fasilitas"].map((header) => (
+            {["No", "Nama Fasilitas", "Ikon"].map((header) => (
               <th key={header} className="border px-4 py-2">{header}</th>
             ))}
             <th className="border p-2">Action</th>
           </tr>
         </thead>
         <tbody>
-          {filteredData
-            .slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage)
-            .map((item, index) => (
-              <tr key={item.id} className="text-center">
-                <td className="border px-4 py-2 ">{index + 1 + (currentPage - 1) * itemsPerPage}</td>
-                <td className="border px-4 py-2">{item.namaFasilitas}</td>
-                <td className="border px-4 py-2">
-                  <button className="text-white bg-green-500 p-2 rounded mr-2">
-                  <FaEdit />
-                </button>
-                <button className="text-white bg-blue-900 p-2 rounded">
-                  <FaTrash />
-                </button>
-                </td>
-              </tr>
-            ))}
+  {filteredData
+    .slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage)
+    .map((item, index) => (
+      <tr key={item.id} className="text-center">
+        <td className="border px-4 py-2">{index + 1 + (currentPage - 1) * itemsPerPage}</td>
+        <td className="border px-4 py-2">{item.namaFasilitas}</td>
+        {/* Bungkus icon dalam div dengan flex */}
+        <td className="border px-4 py-2">
+          <div className="flex justify-center items-center">
+            {item.icon}
+          </div>
+        </td> 
+        <td className="border px-4 py-2">
+          <button className="text-white bg-green-500 p-2 rounded mr-2">
+            <FaEdit />
+          </button>
+          <button className="text-white bg-blue-900 p-2 rounded">
+            <FaTrash />
+          </button>
+        </td>
+      </tr>
+    ))}
         </tbody>
       </table>
 
@@ -1006,17 +1020,27 @@ const TableMakul: React.FC = () => {
           Showing {((currentPage - 1) * itemsPerPage) + 1} to {Math.min(currentPage * itemsPerPage, filteredData.length)} of {filteredData.length} entries
         </span>
         <div>
-          <button onClick={handlePrevious} disabled={currentPage === 1} className="px-4 mx-2 py-2 bg-gray-300 rounded disabled:opacity-50">
+          <button
+            onClick={handlePrevious}
+            disabled={currentPage === 1}
+            className="px-4 mx-2 py-2 bg-gray-300 rounded disabled:opacity-50"
+          >
             Previous
           </button>
-          <button onClick={handleNext} disabled={currentPage >= totalPages} className="px-4 py-2 bg-gray-300 rounded disabled:opacity-50">
+          <button
+            onClick={handleNext}
+            disabled={currentPage >= totalPages}
+            className="px-4 py-2 bg-gray-300 rounded disabled:opacity-50"
+          >
             Next
           </button>
         </div>
       </div>
     </div>
   );
-};   
+};
+
+
 
 
 
@@ -1553,7 +1577,7 @@ const TambahDataFasilitas: React.FC<ConfirmMakul> = ({ open, setOpen }) => {
                     </button>
                     <div className="mt-3 w-full text-center sm:mt-0 sm:text-left">
                       <Dialog.Title as="h3" className="text-lg leading-6 font-medium text-gray-900">
-                        Menambah Mata Kuliah 
+                        Menambah Fasilitas
                       </Dialog.Title>
                       <form className="mt-5 space-y-4">
                         <div>
